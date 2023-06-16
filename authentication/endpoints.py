@@ -62,9 +62,9 @@ def prepare_user_response(user, avatar):
 
     print(response)
     response.set_cookie('access_token', str(
-        access_token), httponly=True)
+        access_token), httponly=True, samesite='None')
     response.set_cookie('refresh_token', str(
-        refresh_token), httponly=True)
+        refresh_token), httponly=True, samesite='None')
 
     return response
 
