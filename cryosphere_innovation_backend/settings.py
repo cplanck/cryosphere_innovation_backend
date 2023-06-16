@@ -75,9 +75,9 @@ MIDDLEWARE = [
 # CORS_ORIGIN_WHITELIST = [
 #     'http://localhost:3000', 'https://cryosphere-innovation-frontend.vercel.app',
 # ]
-CORS_ORIGIN_WHITELIST = [
-    'https://cryosphere-innovation-frontend.vercel.app',
-]
+# CORS_ORIGIN_WHITELIST = [
+#     'https://cryosphere-innovation-frontend.vercel.app',
+# ]
 
 CORS_EXPOSE_HEADERS = ['Set-Cookie']
 CORS_ALLOW_ALL_ORIGINS = True
