@@ -168,7 +168,7 @@ class RefreshAccessToken(APIView):
                 response = JsonResponse(
                     {'success': 'New access token retrieved'})
                 response.set_cookie('access_token', str(
-                    access_token), httponly=True)
+                    access_token), httponly=True, samesite='None', secure=True)
                 return response
             except Exception as e:
                 print(e)
