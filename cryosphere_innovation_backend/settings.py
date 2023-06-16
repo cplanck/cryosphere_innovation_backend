@@ -33,7 +33,7 @@ SECRET_KEY = os.environ['SECRET_KEY']
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'cryosphere-innovation-backend-dev.us-east-1.elasticbeanstalk.com', '172.31.56.225']
+    'cryosphere-innovation-backend-dev.us-east-1.elasticbeanstalk.com', '172.31.56.225', 'localhost']
 
 WEBSITE_ROOT = os.environ['WEBSITE_ROOT']
 
