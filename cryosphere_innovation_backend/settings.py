@@ -172,7 +172,7 @@ REST_AUTH = {
     'JWT_AUTH_SAMESITE': 'None',  # I think we need this
     'JWT_AUTH_SECURE': True,
     # This is needed to send the refresh token in the body (4/27/2023)
-    'JWT_AUTH_HTTPONLY': False,
+    'JWT_AUTH_HTTPONLY': True,
 }
 
 SIMPLE_JWT = {
