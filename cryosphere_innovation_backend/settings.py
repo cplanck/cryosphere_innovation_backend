@@ -167,8 +167,8 @@ REST_FRAMEWORK = {
 
 REST_AUTH = {
     'USE_JWT': True,
-    # 'JWT_AUTH_COOKIE': 'access_token',
-    # 'JWT_AUTH_REFRESH_COOKIE': 'refresh_token',
+    'JWT_AUTH_COOKIE': 'accesss_token',
+    'JWT_AUTH_REFRESH_COOKIE': 'refreshh_token',
     'JWT_AUTH_SAMESITE': None,  # I think we need this
     'JWT_AUTH_SECURE': True,
     # This is needed to send the refresh token in the body (4/27/2023)
