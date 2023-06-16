@@ -169,7 +169,7 @@ REST_AUTH = {
     'USE_JWT': True,
     'JWT_AUTH_COOKIE': 'access_token',
     'JWT_AUTH_REFRESH_COOKIE': 'refresh_token',
-    'JWT_AUTH_SAMESITE': 'None',  # I think we need this
+    'JWT_AUTH_SAMESITE': 'Lax',  # I think we need this
     'JWT_AUTH_SECURE': True,
     # This is needed to send the refresh token in the body (4/27/2023)
     'JWT_AUTH_HTTPONLY': True,
