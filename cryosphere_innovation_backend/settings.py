@@ -19,10 +19,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Initialise environment variables
-# env = environ.Env()
-# environ.Env.read_env()
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -36,8 +32,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    'cryosphere-innovation-backend-dev.us-east-1.elasticbeanstalk.com', '172.31.56.225', 'localhost', 'cplanck.pythonanywhere.com']
+ALLOWED_HOSTS = ['localhost', 'cplanck.pythonanywhere.com']
 
 WEBSITE_ROOT = os.getenv('WEBSITE_ROOT')
 
@@ -172,9 +167,9 @@ REST_AUTH = {
     'JWT_AUTH_COOKIE': 'access_token',
     'JWT_AUTH_REFRESH_COOKIE': 'refresh_token',
     'JWT_AUTH_SAMESITE': 'None',  # I think we need this
-    'JWT_AUTH_SECURE': False,
+    'JWT_AUTH_SECURE': True,
     # This is needed to send the refresh token in the body (4/27/2023)
-    'JWT_AUTH_HTTPONLY': False,
+    'JWT_AUTH_HTTPONLY': True,
 }
 
 SIMPLE_JWT = {
