@@ -82,11 +82,11 @@ CORS_ORIGIN_WHITELIST = [
 CORS_EXPOSE_HEADERS = ['Set-Cookie']
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = [
-    # 'http://localhost:3000',
-    # 'http://127.0.0.1:3000',
-    'https://cryosphere-innovation-frontend.vercel.app',
-]
+# CORS_ALLOWED_ORIGINS = [
+#     # 'http://localhost:3000',
+#     # 'http://127.0.0.1:3000',
+#     'https://cryosphere-innovation-frontend.vercel.app',
+# ]
 # making sure CORS_ALLOW_HEADERS  is not "*"
 CORS_ALLOW_HEADERS = list(default_headers) + ['Set-Cookie', 'Authorization']
 
