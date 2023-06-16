@@ -72,16 +72,19 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# CORS_ORIGIN_WHITELIST = [
+#     'http://localhost:3000', 'https://cryosphere-innovation-frontend.vercel.app',
+# ]
 CORS_ORIGIN_WHITELIST = [
-    'http://localhost:3000', 'https://cryosphere-innovation-frontend.vercel.app',
+    'https://cryosphere-innovation-frontend.vercel.app',
 ]
 
 CORS_EXPOSE_HEADERS = ['Set-Cookie']
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
+    # 'http://localhost:3000',
+    # 'http://127.0.0.1:3000',
     'https://cryosphere-innovation-frontend.vercel.app',
 ]
 # making sure CORS_ALLOW_HEADERS  is not "*"
@@ -167,9 +170,9 @@ REST_AUTH = {
     'JWT_AUTH_COOKIE': 'access_token',
     'JWT_AUTH_REFRESH_COOKIE': 'refresh_token',
     'JWT_AUTH_SAMESITE': 'None',  # I think we need this
-    'JWT_AUTH_SECURE': True,
+    'JWT_AUTH_SECURE': False,
     # This is needed to send the refresh token in the body (4/27/2023)
-    'JWT_AUTH_HTTPONLY': True,
+    'JWT_AUTH_HTTPONLY': False,
 }
 
 SIMPLE_JWT = {
