@@ -62,9 +62,9 @@ def prepare_user_response(user, avatar):
 
     print(response)
     response.set_cookie('access_token', str(
-        access_token), httponly=True, samesite='None', secure=True)
+        access_token), httponly=True, samesite='None', secure=True, domain="cryosphere-innovation-frontend.vercel.app")
     response.set_cookie('refresh_token', str(
-        refresh_token), httponly=True, samesite='None', secure=True)
+        refresh_token), httponly=True, samesite='None', secure=True, domain="cryosphere-innovation-frontend.vercel.app")
 
     return response
 
@@ -168,7 +168,7 @@ class RefreshAccessToken(APIView):
                 response = JsonResponse(
                     {'success': 'New access token retrieved'})
                 response.set_cookie('access_token', str(
-                    access_token), httponly=True, samesite='None', secure=True)
+                    access_token), httponly=True, samesite='None', secure=True, domain="cryosphere-innovation-frontend.vercel.app")
                 return response
             except Exception as e:
                 print(e)
