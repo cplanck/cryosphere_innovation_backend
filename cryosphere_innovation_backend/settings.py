@@ -14,10 +14,15 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+import environ
 from corsheaders.defaults import default_headers
 from dotenv import load_dotenv
 
 load_dotenv()
+
+# Initialise environment variables
+# env = environ.Env()
+# environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,15 +32,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ['SECRET_KEY']
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'cryosphere-innovation-backend-dev.us-east-1.elasticbeanstalk.com', '172.31.56.225', 'localhost']
+    'cryosphere-innovation-backend-dev.us-east-1.elasticbeanstalk.com', '172.31.56.225', 'localhost', 'cplanck.pythonanywhere.com']
 
-WEBSITE_ROOT = os.environ['WEBSITE_ROOT']
+WEBSITE_ROOT = os.getenv('WEBSITE_ROOT')
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -110,22 +116,18 @@ WSGI_APPLICATION = 'cryosphere_innovation_backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.environ['DATABASE_NAME'],
-        'USER': os.environ['DATABASE_USER'],
-        'PASSWORD': os.environ['DATABASE_PASSWORD'],
-        'HOST': os.environ['DATABASE_HOST'],
-        'PORT': os.environ['DATABASE_PORT'],
+        'NAME': os.getenv('DATABASE_NAME'),
+        'USER': os.getenv('DATABASE_USER'),
+        'PASSWORD': os.getenv('DATABASE_PASSWORD'),
+        'HOST': os.getenv('DATABASE_HOST'),
+        'PORT': os.getenv('DATABASE_PORT'),
     },
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.sqlite3',
-    #     'NAME': ':memory:',
-    # }
 }
 
 # APPEND_SLASH = False
 
-AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 
 DATABASES['default']['TEST'] = {'NAME': 'testdb'}
 
@@ -195,7 +197,7 @@ ALGOLIA = {
 
 SITE_ID = 1
 
-STANDALONE_FRONTEND_ROOT = os.environ['STANDALONE_FRONTEND_ROOT']
+STANDALONE_FRONTEND_ROOT = os.getenv('STANDALONE_FRONTEND_ROOT')
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
