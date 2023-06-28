@@ -180,7 +180,11 @@ class RefreshAccessToken(APIView):
 class LogoutUser(APIView):
 
     def post(self, request):
-        response = JsonResponse({'message': 'Logged out successfully'})
-        response.delete_cookie('access_token')  # samesite='None'
-        response.delete_cookie('refresh_token')
-        return response
+        try:
+            response = JsonResponse({'message': 'Logged out successfully'})
+            response.delete_cookie('access_token')  # samesite='None'
+            response.delete_cookie('refresh_token')
+            return response
+        except Exception as e:
+            print(e)
+            return response
