@@ -11,10 +11,13 @@ from .serializers import *
 class DeploymentModelIndex(AlgoliaIndex):
 
     fields = ('id', 'name', 'instrument', 'status', 'details',
-              'deployment_start_date', 'deployment_end_date', 'location', 'algolia_index', 'path')
+              'deployment_start_date', 'deployment_end_date', 'location', 'algolia_index', 'path', 'data_uuid')
 
     settings = {
-        'searchableAttributes': ['algolia_index', 'status', 'deployment_start_date', 'deployment_end_date', 'location', 'details', 'path']
+        'searchableAttributes': ['algolia_index', 'status', 'deployment_start_date', 'deployment_end_date', 'location', 'details', 'path'],
+        'attributesForFaceting': ['status'],
+        'allowTyposOnNumericTokens': False,
+        'customRanking': ['asc(status)']
     }
 
     def get_queryset(self):

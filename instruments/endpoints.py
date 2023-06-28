@@ -173,7 +173,7 @@ class InternalDataEndpoint(viewsets.ViewSet):
     specified. 
 
     GET requests return the entire data
-    Patch requests (for adding data to the MongoDB) require an API with valid permissions.
+    Patch requests (for adding data to the MongoDB) require an API key with valid permissions.
     The permissions is a JSON where the data_uuid must be in the  deployments list, 
     ie., deployment : [data_uuid_1, data_uuid_2]
 
