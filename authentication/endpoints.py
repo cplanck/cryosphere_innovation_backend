@@ -182,8 +182,8 @@ class LogoutUser(APIView):
     def post(self, request):
         try:
             response = JsonResponse({'message': 'Logged out successfully'})
-            response.delete_cookie('access_token')  # samesite='None'
-            response.delete_cookie('refresh_token')
+            response.delete_cookie('access_token', samesite='None')
+            response.delete_cookie('refresh_token', samesite='None')
             return response
         except Exception as e:
             print(e)
