@@ -5,18 +5,17 @@ from django.dispatch import receiver
 
 from .models import Deployment, Instrument
 
-
-@receiver(post_save, sender=Instrument)
-def create_simb3_deployment_instrument_creation(sender, instance, created, **kwargs):
-    """
-    This signal automatically creates a deployment instance when an instrument
-    is created with instrument_type = 'SIMB3' and the user is_staff. Note: if we
-    add internal instruments in the future that need an automatic deployment, this 
-    will need to be modified.
-    """
-    if created and instance.instrument_type == 'SIMB3' and instance.internal:
-        Deployment.objects.create(
-            instrument=instance, deployment_number=0, name=instance.name)
+# @receiver(post_save, sender=Instrument)
+# def create_simb3_deployment_instrument_creation(sender, instance, created, **kwargs):
+#     """
+#     This signal automatically creates a deployment instance when an instrument
+#     is created with instrument_type = 'SIMB3' and the user is_staff. Note: if we
+#     add internal instruments in the future that need an automatic deployment, this
+#     will need to be modified.
+#     """
+#     if created and instance.instrument_type == 'SIMB3' and instance.internal:
+#         Deployment.objects.create(
+#             instrument=instance, deployment_number=0, name=instance.name)
 
 
 @receiver(post_save, sender=Deployment)

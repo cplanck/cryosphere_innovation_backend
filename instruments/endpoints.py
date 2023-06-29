@@ -1,3 +1,4 @@
+import copy
 import json
 import sys
 import time
@@ -74,17 +75,20 @@ class InternalInstrumentEndpoint(viewsets.ModelViewSet):
     def create(self, request):
 
         if request.user.is_staff:
-            data = request.data
-            data['internal'] = True
-            serializer = self.get_serializer(data=data)
+            request.data._mutable = True
+            request.data['internal'] = True
+            serializer = self.get_serializer(data=request.data)
 
             if serializer.is_valid():
                 self.perform_create(serializer)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
 
             else:
+                errors = serializer.errors
+                print(errors)
                 return Response('There was a problem with your request', status=status.HTTP_400_BAD_REQUEST)
         else:
+
             return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 
@@ -137,9 +141,7 @@ class InternalDeploymentEndpoint(viewsets.ModelViewSet):
     def create(self, request):
 
         if request.user.is_staff:
-            data = request.data
-            data['internal'] = True
-            serializer = self.get_serializer(data=data)
+            serializer = self.get_serializer(data=request.data)
             if serializer.is_valid():
                 self.perform_create(serializer)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
