@@ -13,11 +13,17 @@ class BaseInstrument(models.Model):
     provides the standard attributes used in subsequent classes. 
     """
 
+    def get_image_upload_path(instance):
+        instance_id = str(instance.pk)
+        upload_path = f'users/instruments/avatars/{instance_id}'
+        return upload_path
+
     name = models.CharField(max_length=200, null=True)
     serial_number = models.CharField(max_length=100, null=True)
     owner = models.ForeignKey(
         User, on_delete=models.CASCADE, null=True, blank=True)
-    avatar = models.ImageField(null=True, blank=True)
+    avatar = models.ImageField(
+        upload_to='users-media/instruments/avatars', null=True, blank=True)
     description = models.TextField(max_length=2000, null=True, blank=True)
     notes = models.TextField(max_length=5000, null=True, blank=True)
     details = models.JSONField(blank=True, null=True)

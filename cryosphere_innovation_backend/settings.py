@@ -218,3 +218,12 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+# Amazon S3 bucket name
+AWS_STORAGE_BUCKET_NAME = 'cryosphere-innovation-django'
+
+# Set the S3 endpoint URL (optional)
+AWS_S3_ENDPOINT_URL = 'https://s3.amazonaws.com'
