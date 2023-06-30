@@ -11,6 +11,7 @@ def deployment_permissions_filter(self, queryset):
     elif self.request.user.is_staff:
         print('USER IS STAFF: ', self.request.user)
         print(self.request)
+        print(self.request.META)
         # print('TOTAL QUERYSETS PASSED INTO PERSMISSIONS FILTER', queryset.count())
         deployments = deployment_objects
         # print('TOTAL DEPLOYMENT QUERYSETS: ', deployments.count())
