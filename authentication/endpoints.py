@@ -57,9 +57,9 @@ def prepare_user_response(user, avatar):
 
     print(response)
     response.set_cookie('access_token', str(
-        access_token), httponly=True, samesite='None', secure=True, domain='.citestingx.com')
+        access_token), httponly=True, samesite='None', secure=True, domain=os.environ['COOKIE_DOMAIN'])
     response.set_cookie('refresh_token', str(
-        refresh_token), httponly=True, samesite='None', secure=True, domain='.citestingx.com')
+        refresh_token), httponly=True, samesite='None', secure=True, domain=os.environ['COOKIE_DOMAIN'])
 
     return response
 
