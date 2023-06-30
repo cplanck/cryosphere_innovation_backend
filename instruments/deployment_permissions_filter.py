@@ -7,6 +7,7 @@ def deployment_permissions_filter(self, queryset):
         deployments = deployment_objects.filter(private=False)
     elif self.request.user.is_staff:
         deployments = deployment_objects
+        print('TOTAL DEPLOYMENT QUERYSETS: ', deployments.count())
     elif self.request.user.is_authenticated:
         deployments = deployment_objects.exclude(
             Q(private=True) & ~(
