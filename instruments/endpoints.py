@@ -162,7 +162,7 @@ class InternalDeploymentEndpoint(viewsets.ModelViewSet):
             if check_key_permissions(self, '', permissions):
                 return self.queryset
 
-        return deployment_permissions_filter(self, self.queryset)
+        return deployment_permissions_filter(self, Deployment.objects.all().order_by('-last_modified'))
 
 
 # -----------
