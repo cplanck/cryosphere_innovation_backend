@@ -54,23 +54,23 @@ class InternalInstrumentEndpoint(viewsets.ModelViewSet):
     queryset = Instrument.objects.filter(
         internal=True).order_by('-last_modified')
 
-    def get_queryset(self):
-        """
-        Get a queryset of all instruments, unless the instrument has a deployment with private=True
-        AND the request.user is not either 1) the owner of the instrument or 2) on the list of
-        collaborators
-        """
-        if self.request.user.is_anonymous:
-            instruments = Instrument.objects.exclude(
-                Q(deployment__private=True))
-        else:
-            instruments = Instrument.objects.exclude(
-                Q(deployment__private=True) & ~(
-                    Q(owner=self.request.user) | Q(
-                        deployment__collaborators=self.request.user)
-                )
-            )
-        return instruments.order_by('-last_modified')
+    # def get_queryset(self):
+    #     """
+    #     Get a queryset of all instruments, unless the instrument has a deployment with private=True
+    #     AND the request.user is not either 1) the owner of the instrument or 2) on the list of
+    #     collaborators
+    #     """
+    #     if self.request.user.is_anonymous:
+    #         instruments = Instrument.objects.exclude(
+    #             Q(deployment__private=True))
+    #     else:
+    #         instruments = Instrument.objects.exclude(
+    #             Q(deployment__private=True) & ~(
+    #                 Q(owner=self.request.user) | Q(
+    #                     deployment__collaborators=self.request.user)
+    #             )
+    #         )
+    #     return instruments.order_by('-last_modified')
 
     def create(self, request):
 
