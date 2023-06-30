@@ -18,4 +18,6 @@ def deployment_permissions_filter(self, queryset):
         deployments = deployment_objects.filter(
             instrument__internal=True).filter(private=False)
 
+    print(self.request.user)
+    print(deployments)
     return deployments

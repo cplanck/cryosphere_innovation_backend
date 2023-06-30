@@ -46,11 +46,6 @@ def prepare_user_response(user, avatar):
     refresh_token = RefreshToken.for_user(user)
     access_token = refresh_token.access_token
 
-    # access_token_expiration = jwt.decode(
-    #     str(access_token), options={"verify_signature": False})['exp']
-    # refresh_token_expiration = jwt.decode(
-    #     str(refresh_token), options={"verify_signature": False})['exp']
-
     response = JsonResponse(
         {
             'first_name': user.first_name,
