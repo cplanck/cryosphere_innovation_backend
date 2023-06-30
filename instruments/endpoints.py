@@ -151,18 +151,18 @@ class InternalDeploymentEndpoint(viewsets.ModelViewSet):
         else:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
-    # def get_queryset(self):
-    #     # Check if Authorization key was passed (for machine permissions).
-    #     if 'Authorization' in self.request.headers:
-    #         try:
-    #             permissions = APIKey.objects.get(
-    #                 key=self.request.headers['Authorization']).permissions[0]['deployments']
-    #         except:
-    #             return deployment_permissions_filter(self, self.queryset)
-    #         if check_key_permissions(self, '', permissions):
-    #             return self.queryset
+    def get_queryset(self):
+        # Check if Authorization key was passed (for machine permissions).
+        if 'Authorization' in self.request.headers:
+            try:
+                permissions = APIKey.objects.get(
+                    key=self.request.headers['Authorization']).permissions[0]['deployments']
+            except:
+                return deployment_permissions_filter(self, self.queryset)
+            if check_key_permissions(self, '', permissions):
+                return self.queryset
 
-    #     return deployment_permissions_filter(self, self.queryset)
+        return deployment_permissions_filter(self, self.queryset)
 
 
 # -----------
