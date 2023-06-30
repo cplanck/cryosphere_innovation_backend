@@ -129,7 +129,9 @@ class InternalDeploymentEndpoint(viewsets.ModelViewSet):
 
     pagination_class = DeploymentPagination
     lookup_field = 'instrument__serial_number'
-    queryset = Deployment.objects.all().order_by('-last_modified')
+    # queryset = Deployment.objects.all().order_by('-last_modified')
+    queryset = Deployment.objects.all()
+
     filterset_fields = ['status']
 
     def get_serializer_class(self):
@@ -162,7 +164,7 @@ class InternalDeploymentEndpoint(viewsets.ModelViewSet):
             if check_key_permissions(self, '', permissions):
                 return self.queryset
 
-        return deployment_permissions_filter(self, Deployment.objects.all().order_by('-last_modified'))
+        return deployment_permissions_filter(self, self.queryset)
 
 
 # -----------
