@@ -20,15 +20,6 @@ router.register('internal/simb3_deployment_migration',
 
 router.register('internal/data', InternalDataEndpoint, basename='my-api')
 
-# router.register('internal/deployment/data',
-#                 NewInternalDeploymentDataEndpoint, basename='simb3_deployment_migration')
-
 urlpatterns = [
     path('', include(router.urls)),
-    #     path('internal/data/<str:pk>',
-    #          InternalDataEndpoint.as_view(), name='internal_get_data'),
-    #     path('internal/data/<str:pk>/',
-    #          InternalDataEndpoint.as_view(), name='internal_get_data'),
-    #     path('internal/modify/data/',
-    #          InternalDataEndpoint.as_view(), name='internal_post_data'),
 ]
