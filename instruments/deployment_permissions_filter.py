@@ -6,6 +6,8 @@ def deployment_permissions_filter(self, queryset):
     if not self.request.user.is_authenticated:
         print('USER IS ANONOMOUS')
         print(self.request)
+        print(self.request.META)
+        print(self.request.COOKIES)
         deployments = deployment_objects.filter(private=False)
 
     elif self.request.user.is_staff:
