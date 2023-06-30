@@ -4,11 +4,16 @@ from django.db.models import Q
 def deployment_permissions_filter(self, queryset):
     deployment_objects = queryset
     if not self.request.user.is_authenticated:
+        print('USER IS ANONOMOUS')
         deployments = deployment_objects.filter(private=False)
+
     elif self.request.user.is_staff:
         print('USER IS STAFF: ', self.request.user)
+        print('TOTAL QUERYSETS PASSED INTO PERSMISSIONS FILTER', queryset.count())
         deployments = deployment_objects
         print('TOTAL DEPLOYMENT QUERYSETS: ', deployments.count())
+        print('TOTAL DEPLOYMENT OBJECTS: ', deployment_objects.count())
+
     elif self.request.user.is_authenticated:
         print('USER IS REGULAR USER: ', self.request.user)
         deployments = deployment_objects.exclude(
