@@ -155,9 +155,6 @@ class InternalDeploymentEndpoint(viewsets.ModelViewSet):
     def get_queryset(self):
         # Check if Authorization key was passed (for machine permissions).
         queryset = Deployment.objects.all().order_by('-last_modified')
-        # print(self.request)
-        # print('RAW QUERYSET', queryset)
-        # print('RAW QUERYSET COUNT', queryset.count())
         if 'Authorization' in self.request.headers:
             try:
                 permissions = APIKey.objects.get(
