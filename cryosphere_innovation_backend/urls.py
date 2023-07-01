@@ -10,10 +10,10 @@ def index(request):
 
 
 urlpatterns = [
-    path('', index),
+    # path('', index),
+    path('', include('instruments.urls')),
     path('admin/', admin.site.urls),
     path('auth/', include('authentication.urls')),
-    path('api/', include('instruments.urls')),
     path('articles/', include('articles.urls')),
     path('data/', include('data.urls')),
     path('users/', include('user_profiles.urls')),
