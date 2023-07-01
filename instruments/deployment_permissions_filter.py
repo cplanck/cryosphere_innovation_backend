@@ -7,7 +7,6 @@ def deployment_permissions_filter(self, queryset):
         deployments = deployment_objects.filter(private=False)
     elif self.request.user.is_staff:
         deployments = deployment_objects
-
     elif self.request.user.is_authenticated:
         deployments = deployment_objects.exclude(
             Q(private=True) & ~(
@@ -18,4 +17,6 @@ def deployment_permissions_filter(self, queryset):
     else:
         deployments = deployment_objects.filter(
             instrument__internal=True).filter(private=False)
+
+        print(deployments)
     return deployments

@@ -126,11 +126,9 @@ class InternalDeploymentEndpoint(viewsets.ModelViewSet):
     """
 
     authentication_classes = [CookieTokenAuthentication]
-
     pagination_class = DeploymentPagination
     lookup_field = 'instrument__serial_number'
-    # queryset = Deployment.objects.all().order_by('-last_modified')
-
+    queryset = Deployment.objects.all().order_by('-last_modified')
     filterset_fields = ['status']
 
     def get_serializer_class(self):
@@ -154,17 +152,18 @@ class InternalDeploymentEndpoint(viewsets.ModelViewSet):
 
     def get_queryset(self):
         # Check if Authorization key was passed (for machine permissions).
-        queryset = Deployment.objects.all().order_by('-last_modified')
         if 'Authorization' in self.request.headers:
             try:
                 permissions = APIKey.objects.get(
                     key=self.request.headers['Authorization']).permissions[0]['deployments']
+
             except:
                 return deployment_permissions_filter(self, self.queryset)
             if check_key_permissions(self, '', permissions):
+                print('YOU MADE IT')
                 return self.queryset
 
-        return deployment_permissions_filter(self, queryset)
+        return deployment_permissions_filter(self, self.queryset)
 
 
 # -----------
