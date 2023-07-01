@@ -51,6 +51,7 @@ class BaseDeployment(models.Model):
     status = models.CharField(max_length=20, null=True, blank=True)
     location = models.CharField(max_length=500, null=True, blank=True)
     path = models.CharField(max_length=500, null=True, blank=True)
+    slug = models.CharField(max_length=500, null=True, blank=True)
     data_uuid = models.UUIDField(default=uuid.uuid4, editable=True)
     deployment_description = models.TextField(
         max_length=2000, null=True, blank=True)

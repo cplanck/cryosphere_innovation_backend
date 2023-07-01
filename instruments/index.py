@@ -10,8 +10,12 @@ from .serializers import *
 @register(Deployment)
 class DeploymentModelIndex(AlgoliaIndex):
 
+    """
+    Run python3 manage.py algolia_reindex when you make changes to this file
+    """
+
     fields = ('id', 'name', 'instrument', 'status', 'details',
-              'deployment_start_date', 'deployment_end_date', 'location', 'algolia_index', 'path', 'data_uuid')
+              'deployment_start_date', 'deployment_end_date', 'location', 'algolia_index', 'path', 'data_uuid', 'slug')
 
     settings = {
         'searchableAttributes': ['algolia_index', 'status', 'deployment_start_date', 'deployment_end_date', 'location', 'details', 'path'],

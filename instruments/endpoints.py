@@ -127,7 +127,8 @@ class InternalDeploymentEndpoint(viewsets.ModelViewSet):
 
     authentication_classes = [CookieTokenAuthentication]
     pagination_class = DeploymentPagination
-    lookup_field = 'instrument__serial_number'
+    # lookup_field = 'instrument__serial_number'
+    lookup_field = 'slug'
     queryset = Deployment.objects.all().order_by('-last_modified')
     filterset_fields = ['status']
 

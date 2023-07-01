@@ -18,7 +18,7 @@ class DashboarDeploymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Deployment
         fields = ['name', 'id', 'status',
-                  'deployment_start_date', 'deployment_end_date', 'instrument', 'data_uuid', 'location', 'path']
+                  'deployment_start_date', 'deployment_end_date', 'instrument', 'data_uuid', 'location', 'path', 'slug']
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
