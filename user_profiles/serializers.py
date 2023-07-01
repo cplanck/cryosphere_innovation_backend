@@ -45,6 +45,19 @@ class UserProfileSerializer(serializers.ModelSerializer):
         return avatar
 
 
+class UserSerializer(serializers.ModelSerializer):
+    avatar = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ['id', 'first_name', 'last_name', 'username',
+                  'avatar', 'email', 'date_joined', 'is_staff']
+
+    def get_avatar(self, obj):
+        avatar = 'https://api.dicebear.com/6.x/bottts/png?seed=Snickers'
+        return avatar
+
+
 class UserProfilePostSerializer(serializers.ModelSerializer):
 
     class Meta:

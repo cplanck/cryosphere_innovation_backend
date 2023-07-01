@@ -23,7 +23,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from .deployment_permissions_filter import deployment_permissions_filter
 from .models import Deployment, Instrument
 from .serializers import (DeploymentGETSerializer, DeploymentSerializer,
-                          InstrumentSerializer)
+                          InstrumentPOSTSerializer, InstrumentSerializer)
 
 
 class InstrumentPagination(pagination.PageNumberPagination):
@@ -53,24 +53,6 @@ class InternalInstrumentEndpoint(viewsets.ModelViewSet):
     pagination_class = InstrumentPagination
     queryset = Instrument.objects.filter(
         internal=True).order_by('-last_modified')
-
-    # def get_queryset(self):
-    #     """
-    #     Get a queryset of all instruments, unless the instrument has a deployment with private=True
-    #     AND the request.user is not either 1) the owner of the instrument or 2) on the list of
-    #     collaborators
-    #     """
-    #     if self.request.user.is_anonymous:
-    #         instruments = Instrument.objects.exclude(
-    #             Q(deployment__private=True))
-    #     else:
-    #         instruments = Instrument.objects.exclude(
-    #             Q(deployment__private=True) & ~(
-    #                 Q(owner=self.request.user) | Q(
-    #                     deployment__collaborators=self.request.user)
-    #             )
-    #         )
-    #     return instruments.order_by('-last_modified')
 
     def create(self, request):
 
@@ -127,7 +109,6 @@ class InternalDeploymentEndpoint(viewsets.ModelViewSet):
 
     authentication_classes = [CookieTokenAuthentication]
     pagination_class = DeploymentPagination
-    # lookup_field = 'instrument__serial_number'
     lookup_field = 'slug'
     queryset = Deployment.objects.all().order_by('-last_modified')
     filterset_fields = ['status']

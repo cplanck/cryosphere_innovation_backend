@@ -2,12 +2,13 @@ import json
 from os import stat
 
 from authentication.http_cookie_authentication import CookieTokenAuthentication
+from django.contrib.auth.models import User
 from django.shortcuts import render
 from instruments.deployment_permissions_filter import \
     deployment_permissions_filter
 from rest_framework import status, viewsets
 from rest_framework.authentication import SessionAuthentication
-from rest_framework.permissions import (IsAuthenticated,
+from rest_framework.permissions import (IsAdminUser, IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -30,6 +31,16 @@ class UserProfileEndpoint(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return UserProfile.objects.filter(user=self.request.user)
+
+
+class UserEndpoint(viewsets.ModelViewSet):
+    """
+    This endpoint is for admin use only. 
+    """
+    authentication_classes = [CookieTokenAuthentication]
+    permission_classes = [IsAdminUser]
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
 
 
 class DashboardDeploymentMigration(viewsets.ModelViewSet):

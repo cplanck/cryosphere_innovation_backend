@@ -1,9 +1,26 @@
 from rest_framework import serializers
+from user_profiles.serializers import UserSerializer
 
 from .models import *
 
 
 class InstrumentSerializer(serializers.ModelSerializer):
+    # owner = UserSerializer()
+
+    class Meta:
+        model = Instrument
+        fields = '__all__'
+
+    def get_fields(self):
+        fields = super().get_fields()
+        request = self.context.get('request')
+        if request and request.method == 'GET':
+            # Customize fields for GET requests
+            fields['owner'] = UserSerializer()
+        return fields
+
+
+class InstrumentPOSTSerializer(serializers.ModelSerializer):
     class Meta:
         model = Instrument
         fields = '__all__'

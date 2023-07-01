@@ -23,8 +23,9 @@ def create_mongo_db_collection_for_deployment(sender, instance, created, **kwarg
     """
     Automatically create a new MongoDB collection when a new deployment is added.
     """
+    print(instance)
     if created and not mongo_collection_exists(str(instance.data_uuid)):
-        create_mongodb_collection(str(instance.data_uuid, 'time_stamp'))
+        create_mongodb_collection(str(instance.data_uuid), 'time_stamp')
 
 
 @receiver(post_delete, sender=Deployment)
