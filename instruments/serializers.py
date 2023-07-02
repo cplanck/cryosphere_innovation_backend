@@ -5,7 +5,6 @@ from .models import *
 
 
 class InstrumentSerializer(serializers.ModelSerializer):
-    # owner = UserSerializer()
 
     class Meta:
         model = Instrument
@@ -15,7 +14,6 @@ class InstrumentSerializer(serializers.ModelSerializer):
         fields = super().get_fields()
         request = self.context.get('request')
         if request and request.method == 'GET':
-            # Customize fields for GET requests
             fields['owner'] = UserSerializer()
         return fields
 
@@ -39,6 +37,7 @@ class DeploymentGETSerializer(serializers.ModelSerializer):
     Returns a nested representation of instrument on GET requests
     """
     instrument = DeploymentInstrumentSerializer()
+    collaborators = UserSerializer(many=True)
 
     class Meta:
         model = Deployment
