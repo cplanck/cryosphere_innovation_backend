@@ -1,5 +1,6 @@
 import json
 import os
+import random
 import re
 import urllib.parse
 import uuid
@@ -7,11 +8,8 @@ from datetime import datetime, timedelta
 from random import seed
 
 import jwt
-# from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
-# from allauth.socialaccount.providers.oauth2.client import OAuth2Client
-# from dj_rest_auth.registration.views import SocialLoginView
 from django.conf import settings
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
@@ -72,20 +70,57 @@ class GoogleOneTap(APIView):
             user_info_from_google = id_token.verify_oauth2_token(
                 request.data, requests.Request(), os.environ['GOOGLE_CLIENT_ID'])
 
-            user = User.objects.get(email=user_info_from_google['email'])
+            user = User.objects.filter(email=user_info_from_google['email'])
 
             if user:
                 try:
-                    avatar = user_info_from_google['picture']
+                    # check if user has uploaded avatar
+                    user = user.first()
+                    user_profile = UserProfile.objects.get(user=user)
+                    if user_profile.avatar:
+                        avatar = user_profile.avatar.url
+                    else:
+                        # this will cause an error if it doesn't exist
+                        avatar = user_info_from_google['picture']
                 except:
-                    avatar = 'https://api.dicebear.com/6.x/bottts/png?seed=Snickers'
+                    avatar = f'https://api.dicebear.com/6.x/bottts/png?seed={user_profile.robot}'
                     # Also check if a users uploaded an avatar...
                 response = prepare_user_response(user, avatar)
 
                 return response
             else:
-                # create account...
-                pass
+                # User email doesn't exist in system, so create the user
+                user = User.objects.create_user(
+                    username=uuid.uuid4(), email=user_info_from_google['email'])
+                user.set_unusable_password()
+
+                user_profile = UserProfile.objects.get(user=user)
+                robot_avatars = ['Snickers', 'Mimi', 'Boots',
+                                 'Whiskers', 'Jasper', 'Gizmo', 'Jasmine', 'Scooter']
+                user_profile.robot = random.choice(robot_avatars)
+                user_profile.save()
+
+                try:
+                    if user_info_from_google['given_name']:
+                        user.first_name = user_info_from_google['given_name']
+                except:
+                    user.first_name = 'no_given_name'
+                try:
+                    if user_info_from_google['family_name']:
+                        user.last_name = user_info_from_google['family_name']
+                except:
+                    user.first_name = 'no_family_name'
+
+                user.save()
+                try:
+                    avatar = user_info_from_google['picture']
+                except:
+                    avatar = f'https://api.dicebear.com/6.x/bottts/png?seed={user_profile.robot}'
+
+                login(
+                    request, user, backend='authentication.email_authentication_backend.EmailBackend')
+                response = prepare_user_response(user, avatar)
+                return response
 
         except Exception as e:
             print(e)
@@ -103,14 +138,18 @@ class StandardLogin(APIView):
     """
 
     def post(self, request, *args, **kwargs):
-
         try:
             user = authenticate(
                 request, username=request.data['username'],
                 password=request.data['password'])
 
             if user:
-                avatar = ''
+                user_profile = UserProfile.objects.get(user=user)
+                if user_profile.avatar:
+                    avatar = user_profile.avatar.url
+                else:
+                    avatar = f'https://api.dicebear.com/6.x/bottts/png?seed={user_profile.robot}'
+
                 response = prepare_user_response(user, avatar)
                 return response
             else:
@@ -161,6 +200,10 @@ class CreateNewUser(APIView):
         username = str(uuid.uuid4())
         email = request.data.get('email')
         password = request.data.get('password')
+        first_name = request.data.get('first_name')
+        last_name = request.data.get('last_name')
+
+        print(request.data)
 
         if not all([username, email, password]):
             return Response({'error': 'Please provide an email and a password.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -181,7 +224,21 @@ class CreateNewUser(APIView):
         except:
             return Response({'error': 'Failed to create user.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        refresh = RefreshToken.for_user(user)
-        access_token = refresh.access_token
+        try:
+            user.first_name = first_name
+            user.last_name = last_name
+            user.save()
+        except Exception as e:
+            print(e)
+            return Response({'error': 'You likely forgot to specify your first or last name'}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({'access': str(access_token), 'refresh': str(refresh)}, status=status.HTTP_201_CREATED)
+        user_profile = UserProfile.objects.get(user=user)
+        robot_avatars = ['Snickers', 'Mimi', 'Boots',
+                         'Whiskers', 'Jasper', 'Gizmo', 'Jasmine', 'Scooter']
+        user_profile.robot = random.choice(robot_avatars)
+        user_profile.save()
+
+        avatar = f'https://api.dicebear.com/6.x/bottts/png?seed={user_profile.robot}'
+        response = prepare_user_response(user, avatar)
+
+        return response

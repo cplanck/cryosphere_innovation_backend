@@ -1,5 +1,6 @@
 import json
 import re
+import uuid
 from os import stat
 
 from authentication.http_cookie_authentication import CookieTokenAuthentication
@@ -38,12 +39,22 @@ class UserSettingsEndpoint(viewsets.ModelViewSet):
             file_type = avatar.content_type.split('/')[1]
             request.data.pop('avatar')
             user_profile = UserProfile.objects.get(user=user)
-            user_profile.avatar.save(f"{user.id}.{file_type})", avatar)
+            user_profile.avatar.save(
+                f"{user.id}/{uuid.uuid4()}.{file_type})", avatar)
 
-        serializer = self.get_serializer(user, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response({'Profile updated'}, status=status.HTTP_200_OK)
+        email = request.data['email']
+        print(email)
+        # check if email exists
+        if self.queryset.filter(email=email).exists() and user.email != email:
+            print(
+                f'EMAIL {email} ALREADY EXISTS. SELECT A NEW ONE (YOUR CURRENT EMAIL IS {user.email}')
+            return Response({'email': 'exists'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            serializer = self.get_serializer(
+                user, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response({'Profile updated'}, status=status.HTTP_200_OK)
 
 
 class UserProfileEndpoint(viewsets.ModelViewSet):
