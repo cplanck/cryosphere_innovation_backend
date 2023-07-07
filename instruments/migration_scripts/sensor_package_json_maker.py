@@ -16,7 +16,7 @@ for field in fields:
         dtc_field_num = field.split('_')[2]
         pretty_field_name = 'Temperature String Sensor ' + dtc_field_num
     json_list.append({"id": count, "fieldName": field,
-                     "name": pretty_field_name, "precision": 3})
+                     "name": pretty_field_name, "precision": 3, 'unit': 'C'})
     count = count + 1
 
 print(json.dumps(json_list))

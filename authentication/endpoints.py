@@ -50,6 +50,7 @@ def prepare_user_response(user, avatar):
         {
             'first_name': user.first_name,
             'last_name': user.last_name,
+            'email': user.email,
             'is_staff': user.is_staff,
             'avatar': avatar,
             'profile': UserProfileSerializer(user_profile).data
@@ -62,38 +63,6 @@ def prepare_user_response(user, avatar):
         refresh_token), httponly=True, samesite='None', secure=True, domain=os.environ['COOKIE_DOMAIN'])
 
     return response
-
-
-class CreateNewUser(APIView):
-
-    def post(self, request):
-        username = str(uuid.uuid4())
-        email = request.data.get('email')
-        password = request.data.get('password')
-
-        if not all([username, email, password]):
-            return Response({'error': 'Please provide an email and a password.'}, status=status.HTTP_400_BAD_REQUEST)
-
-        elif email in User.objects.values_list('email', flat=True):
-            print('YOU MADE IT IN HERE')
-            return Response({'error': 'This email already exists in our system.'}, status=status.HTTP_400_BAD_REQUEST)
-
-        elif not re.match(r'^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$', email):
-            return Response({'error': 'You may have not entered a valid email'}, status=status.HTTP_400_BAD_REQUEST)
-
-        elif len(email) > 100 or len(password) > 100:
-            return Response({'error': 'Your email or password might be too long'}, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            user = User.objects.create_user(
-                username=username, email=email, password=password)
-        except:
-            return Response({'error': 'Failed to create user.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-        refresh = RefreshToken.for_user(user)
-        access_token = refresh.access_token
-
-        return Response({'access': str(access_token), 'refresh': str(refresh)}, status=status.HTTP_201_CREATED)
 
 
 class GoogleOneTap(APIView):
@@ -119,6 +88,7 @@ class GoogleOneTap(APIView):
                 pass
 
         except Exception as e:
+            print(e)
             return HttpResponse({'There was a problem logging you in'})
 
 
@@ -183,3 +153,35 @@ class LogoutUser(APIView):
         except Exception as e:
             print(e)
             return response
+
+
+class CreateNewUser(APIView):
+
+    def post(self, request):
+        username = str(uuid.uuid4())
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        if not all([username, email, password]):
+            return Response({'error': 'Please provide an email and a password.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        elif email in User.objects.values_list('email', flat=True):
+            print('YOU MADE IT IN HERE')
+            return Response({'error': 'This email already exists in our system.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        elif not re.match(r'^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$', email):
+            return Response({'error': 'You may have not entered a valid email'}, status=status.HTTP_400_BAD_REQUEST)
+
+        elif len(email) > 100 or len(password) > 100:
+            return Response({'error': 'Your email or password might be too long'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.create_user(
+                username=username, email=email, password=password)
+        except:
+            return Response({'error': 'Failed to create user.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        refresh = RefreshToken.for_user(user)
+        access_token = refresh.access_token
+
+        return Response({'access': str(access_token), 'refresh': str(refresh)}, status=status.HTTP_201_CREATED)

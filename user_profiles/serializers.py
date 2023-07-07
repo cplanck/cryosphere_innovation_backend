@@ -1,4 +1,6 @@
 # from allauth.socialaccount.models import SocialAccount
+from dataclasses import field
+
 from instruments.models import Deployment, Instrument
 from rest_framework import serializers
 
@@ -22,13 +24,13 @@ class DashboarDeploymentSerializer(serializers.ModelSerializer):
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    avatar = serializers.SerializerMethodField()
+    # avatar = serializers.SerializerMethodField()
     dashboard_deployments = DashboarDeploymentSerializer(
         many=True, read_only=True)
 
     class Meta:
         model = UserProfile
-        fields = ['user', 'full_name', 'avatar', 'social_login',
+        fields = ['user', 'full_name', 'social_login',
                   'has_social_avatar', 'dashboard_deployments', 'id']
 
     def get_avatar(self, obj):
@@ -50,12 +52,19 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'first_name', 'last_name', 'username',
+        fields = ['id', 'first_name', 'last_name', 'username', 'email',
                   'avatar', 'email', 'date_joined', 'is_staff']
 
     def get_avatar(self, obj):
         avatar = 'https://api.dicebear.com/6.x/bottts/png?seed=Snickers'
         return avatar
+
+
+class UserModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = '__all__'
 
 
 class UserProfilePostSerializer(serializers.ModelSerializer):

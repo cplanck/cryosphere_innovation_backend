@@ -1,4 +1,5 @@
 import json
+import re
 from os import stat
 
 from authentication.http_cookie_authentication import CookieTokenAuthentication
@@ -18,7 +19,38 @@ from user_profiles.models import UserProfile
 from user_profiles.serializers import *
 
 
+class UserSettingsEndpoint(viewsets.ModelViewSet):
+    """
+    Production endpoint for modifying user settings from 
+    the user dashboard.
+    Note: this endpoint is a little more complicated because 
+    it modifies two models, User and UserProfile.
+    """
+
+    queryset = User.objects.all()
+    serializer_class = UserModelSerializer
+
+    def partial_update(self, request, *args, **kwargs):
+        request.data._mutable = True
+        user = self.get_object()
+        if 'avatar' in request.data:
+            avatar = request.data['avatar']
+            file_type = avatar.content_type.split('/')[1]
+            request.data.pop('avatar')
+            user_profile = UserProfile.objects.get(user=user)
+            user_profile.avatar.save(f"{user.id}.{file_type})", avatar)
+
+        serializer = self.get_serializer(user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({'Profile updated'}, status=status.HTTP_200_OK)
+
+
 class UserProfileEndpoint(viewsets.ModelViewSet):
+
+    """
+    Get the user profile for a logged in user. 
+    """
     authentication_classes = [CookieTokenAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = UserProfileSerializer
@@ -34,8 +66,9 @@ class UserProfileEndpoint(viewsets.ModelViewSet):
 
 
 class UserEndpoint(viewsets.ModelViewSet):
+
     """
-    This endpoint is for admin use only. 
+    This endpoint is for admin use only. It returns all user objects in the database. 
     """
     authentication_classes = [CookieTokenAuthentication]
     permission_classes = [IsAdminUser]
