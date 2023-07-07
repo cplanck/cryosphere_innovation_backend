@@ -14,4 +14,5 @@ class DeploymentAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Instrument, InstrumentAdmin)
+admin.site.register(InstrumentSensorPackage)
 admin.site.register(Deployment, DeploymentAdmin)

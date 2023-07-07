@@ -20,10 +20,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
+from instruments.base_models import InstrumentSensorPackage
+
 from .deployment_permissions_filter import deployment_permissions_filter
 from .models import Deployment, Instrument
 from .serializers import (DeploymentGETSerializer, DeploymentSerializer,
-                          InstrumentPOSTSerializer, InstrumentSerializer)
+                          InstrumentPOSTSerializer,
+                          InstrumentSensorPackageSerializer,
+                          InstrumentSerializer)
 
 
 class InstrumentPagination(pagination.PageNumberPagination):
@@ -148,9 +152,6 @@ class InternalDeploymentEndpoint(viewsets.ModelViewSet):
         return deployment_permissions_filter(self, self.queryset)
 
 
-# -----------
-
-
 class InternalDataEndpoint(viewsets.ViewSet):
 
     """
@@ -197,6 +198,14 @@ class InternalDataEndpoint(viewsets.ViewSet):
         else:
             return Response('API key is either invalid or key doesnt have permissions.',
                             status=status.HTTP_400_BAD_REQUEST)
+
+
+class InstrumentSensorPackageEndpoint(viewsets.ModelViewSet):
+    authentication_classes = [CookieTokenAuthentication]
+    serializer_class = InstrumentSensorPackageSerializer
+    queryset = InstrumentSensorPackage.objects.all().order_by('-last_modified')
+
+# ---------
 
 
 class SIMB3MigrationEndpoint(viewsets.ModelViewSet):

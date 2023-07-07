@@ -4,6 +4,13 @@ from user_profiles.serializers import UserSerializer
 from .models import *
 
 
+class SensorPackageInstrumentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = InstrumentSensorPackage
+        fields = ['id', 'name']
+
+
 class InstrumentSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -15,6 +22,7 @@ class InstrumentSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if request and request.method == 'GET':
             fields['owner'] = UserSerializer()
+            fields['sensor_package'] = SensorPackageInstrumentSerializer()
         return fields
 
 
@@ -25,11 +33,12 @@ class InstrumentPOSTSerializer(serializers.ModelSerializer):
 
 
 class DeploymentInstrumentSerializer(serializers.ModelSerializer):
+    sensor_package = SensorPackageInstrumentSerializer()
 
     class Meta:
         model = Instrument
         fields = ['name', 'avatar', 'id',
-                  'serial_number', 'instrument_type']
+                  'serial_number', 'instrument_type', 'sensor_package']
 
 
 class DeploymentGETSerializer(serializers.ModelSerializer):
@@ -51,4 +60,10 @@ class DeploymentSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Deployment
+        fields = '__all__'
+
+
+class InstrumentSensorPackageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InstrumentSensorPackage
         fields = '__all__'

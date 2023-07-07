@@ -12,8 +12,11 @@ router.register('instruments', InternalInstrumentEndpoint,
 router.register('deployments', InternalDeploymentEndpoint,
                 basename='internal_deployments')
 
-router.register('deployment/data', InternalDataEndpoint, basename='my-api')
+router.register('deployment/data', InternalDataEndpoint,
+                basename='deployment_data')
 
+router.register('sensors', InstrumentSensorPackageEndpoint,
+                basename='instrument_sensor_package')
 
 router.register('simb3_instrument_migration',
                 SIMB3MigrationEndpoint, basename='new_data_endpoint')
