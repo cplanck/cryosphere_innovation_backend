@@ -34,11 +34,12 @@ class UserSettingsEndpoint(viewsets.ModelViewSet):
     def partial_update(self, request, *args, **kwargs):
         request.data._mutable = True
         user = self.get_object()
+        user_profile = UserProfile.objects.get(user=user)
+
         if 'avatar' in request.data:
             avatar = request.data['avatar']
             file_type = avatar.content_type.split('/')[1]
             request.data.pop('avatar')
-            user_profile = UserProfile.objects.get(user=user)
             user_profile.avatar.save(
                 f"{user.id}/{uuid.uuid4()}.{file_type})", avatar)
 
@@ -54,7 +55,13 @@ class UserSettingsEndpoint(viewsets.ModelViewSet):
                 user, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            return Response({'Profile updated'}, status=status.HTTP_200_OK)
+
+            res = {'email': serializer.data['email'], 'first_name': serializer.data['first_name'],
+                   'last_name': serializer.data['last_name']}
+            # print(user_profile.avatar.)
+            if user_profile.avatar:
+                res['avatar'] = user_profile.avatar.url
+            return Response(res, status=status.HTTP_200_OK)
 
 
 class UserProfileEndpoint(viewsets.ModelViewSet):
