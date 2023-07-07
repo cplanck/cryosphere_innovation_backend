@@ -152,6 +152,15 @@ class InternalDeploymentEndpoint(viewsets.ModelViewSet):
         return deployment_permissions_filter(self, self.queryset)
 
 
+def strip_data_ends(data, strip_from_start, strip_from_end):
+    print(strip_from_start)
+    if strip_from_start:
+        data = data[strip_from_start:]
+    if strip_from_end:
+        data = data[:-strip_from_end]
+    return data
+
+
 class InternalDataEndpoint(viewsets.ViewSet):
 
     """
@@ -175,9 +184,15 @@ class InternalDataEndpoint(viewsets.ViewSet):
             self,  Deployment.objects.all()).filter(data_uuid=pk)
 
         if queryset:
+            strip_ends = queryset.values_list(
+                'rows_from_start', 'rows_from_end')
+            rows_from_start = strip_ends[0][0]
+            rows_from_end = strip_ends[0][1]
             fields = request.query_params.getlist('field')
             data = get_data_from_mongodb(pk, fields)
-            return Response(data, status=status.HTTP_200_OK)
+            stripped_data = strip_data_ends(
+                data, rows_from_start, rows_from_end)
+            return Response(stripped_data, status=status.HTTP_200_OK)
         else:
             return Response('You don\'t have permission to perform this action.', status=status.HTTP_401_UNAUTHORIZED)
 
