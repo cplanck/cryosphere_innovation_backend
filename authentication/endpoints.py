@@ -54,7 +54,6 @@ def prepare_user_response(user, avatar):
             'profile': UserProfileSerializer(user_profile).data
         })
 
-    print(response)
     response.set_cookie('access_token', str(
         access_token), httponly=True, samesite='None', secure=True, domain=os.environ['COOKIE_DOMAIN'])
     response.set_cookie('refresh_token', str(
@@ -85,6 +84,9 @@ class GoogleOneTap(APIView):
                 except:
                     avatar = f'https://api.dicebear.com/6.x/bottts/png?seed={user_profile.robot}'
                     # Also check if a users uploaded an avatar...
+
+                login(
+                    request, user, backend='authentication.email_authentication_backend.EmailBackend')
                 response = prepare_user_response(user, avatar)
 
                 return response
@@ -98,6 +100,7 @@ class GoogleOneTap(APIView):
                 robot_avatars = ['Snickers', 'Mimi', 'Boots',
                                  'Whiskers', 'Jasper', 'Gizmo', 'Jasmine', 'Scooter']
                 user_profile.robot = random.choice(robot_avatars)
+                user_profile.social_login = True
                 user_profile.save()
 
                 try:
@@ -149,7 +152,8 @@ class StandardLogin(APIView):
                     avatar = user_profile.avatar.url
                 else:
                     avatar = f'https://api.dicebear.com/6.x/bottts/png?seed={user_profile.robot}'
-
+                login(
+                    request, user, backend='authentication.email_authentication_backend.EmailBackend')
                 response = prepare_user_response(user, avatar)
                 return response
             else:

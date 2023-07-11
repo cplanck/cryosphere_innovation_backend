@@ -22,18 +22,15 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost',
-                 'cplanck.pythonanywhere.com', 'api.citestingx.com']
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+ALLOWED_HOSTS = ['localhost', 'api.citestingx.com']
 
 WEBSITE_ROOT = os.getenv('WEBSITE_ROOT')
 
@@ -52,14 +49,15 @@ INSTALLED_APPS = [
     'dj_rest_auth',
     'rest_framework_simplejwt',
     'django_extensions',
-    'api',
     'authentication',
     'instruments',
     'user_profiles',
+    'general',
     'django_filters',
     'articles',
     'storages',
     'algoliasearch_django',
+    'django_gsuite_email',
 ]
 
 MIDDLEWARE = [
@@ -96,7 +94,7 @@ ROOT_URLCONF = 'cryosphere_innovation_backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -134,9 +132,6 @@ AWS_S3_REGION_NAME = 'us-east-1'
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 AWS_S3_CUSTOM_DOMAIN = 'd15g1rufdjpafj.cloudfront.net'
 
-# Password validation #
-# https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -155,25 +150,27 @@ AUTH_PASSWORD_VALIDATORS = [
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
-        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
-        # 'rest_framework.renderers.BrowsableAPIRenderer',
     ],
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
+}
+
+REST_AUTH_SERIALIZERS = {
 
 }
 
 REST_AUTH = {
     'USE_JWT': True,
     'JWT_AUTH_COOKIE': 'accesss_token',
-    'JWT_AUTH_REFRESH_COOKIE': 'refreshh_token',
+    'JWT_AUTH_REFRESH_COOKIE': 'refresh_token',
     'JWT_AUTH_SAMESITE': None,  # I think we need this
     'JWT_AUTH_SECURE': True,
     # This is needed to send the refresh token in the body (4/27/2023)
     'JWT_AUTH_HTTPONLY': True,
+    'PASSWORD_RESET_SERIALIZER': 'general.serializers.CustomPasswordResetSerializer',
 }
 
 SIMPLE_JWT = {
@@ -193,6 +190,13 @@ ALGOLIA = {
     'API_KEY': '8cfb959eaf00eb09e8e296ef747dae95'
 }
 
+EMAIL_BACKEND = 'django_gsuite_email.GSuiteEmailBackend'
+
+DEFAULT_FROM_EMAIL = 'support@cryosphereinnovation.com'
+
+GSUITE_CREDENTIALS_FILE = os.path.join(
+    BASE_DIR, 'static/gsuite_email/gsuite_email_creds.json')
+
 SITE_ID = 1
 
 STANDALONE_FRONTEND_ROOT = os.getenv('STANDALONE_FRONTEND_ROOT')
@@ -208,22 +212,12 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.0/howto/static-files/
-
 STATIC_URL = 'static/'
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
-# Amazon S3 bucket name
 AWS_STORAGE_BUCKET_NAME = 'cryosphere-innovation-django'
 
-# Set the S3 endpoint URL (optional)
 AWS_S3_ENDPOINT_URL = 'https://s3.amazonaws.com'

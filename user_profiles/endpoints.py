@@ -25,7 +25,8 @@ class UserSettingsEndpoint(viewsets.ModelViewSet):
     Production endpoint for modifying user settings from 
     the user dashboard.
     Note: this endpoint is a little more complicated because 
-    it modifies two models, User and UserProfile.
+    it modifies two models, User and UserProfile. In the future we 
+    should also handle avatars better. 
     """
 
     queryset = User.objects.all()
@@ -44,11 +45,8 @@ class UserSettingsEndpoint(viewsets.ModelViewSet):
                 f"{user.id}/{uuid.uuid4()}.{file_type})", avatar)
 
         email = request.data['email']
-        print(email)
-        # check if email exists
+
         if self.queryset.filter(email=email).exists() and user.email != email:
-            print(
-                f'EMAIL {email} ALREADY EXISTS. SELECT A NEW ONE (YOUR CURRENT EMAIL IS {user.email}')
             return Response({'email': 'exists'}, status=status.HTTP_400_BAD_REQUEST)
         else:
             serializer = self.get_serializer(
@@ -58,7 +56,6 @@ class UserSettingsEndpoint(viewsets.ModelViewSet):
 
             res = {'email': serializer.data['email'], 'first_name': serializer.data['first_name'],
                    'last_name': serializer.data['last_name']}
-            # print(user_profile.avatar.)
             if user_profile.avatar:
                 res['avatar'] = user_profile.avatar.url
             return Response(res, status=status.HTTP_200_OK)
