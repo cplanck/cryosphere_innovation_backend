@@ -185,6 +185,8 @@ AUTHENTICATION_BACKENDS = [
     'authentication.email_authentication_backend.EmailBackend',
 ]
 
+PASSWORD_RESET_TIMEOUT = 900  # Reset tokens expire after 15 mintues
+
 ALGOLIA = {
     'APPLICATION_ID': '2VQU5R8BW0',
     'API_KEY': '8cfb959eaf00eb09e8e296ef747dae95'

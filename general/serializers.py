@@ -14,20 +14,14 @@ class CustomPasswordResetSerializer(PasswordResetSerializer):
     """
 
     def get_email_options(self):
-        # print(self.context['request'].data)
-        # print(self.context)
+
         user = User.objects.get(
             email=self.context['request'].data['email'])
-        # print(user)
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
         domain = str(settings.WEBSITE_ROOT),
         frontend_domain = settings.STANDALONE_FRONTEND_ROOT
 
-        # print(uid)
-        # print(token)
-        # print(domain)
-        # # Get
         return {
             'subject_template_name': 'registration/password_reset_subject.txt',
             'html_email_template_name': 'registration/password_reset_email.html',

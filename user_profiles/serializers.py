@@ -11,7 +11,7 @@ from user_profiles.models import UserProfile
 class InstrumentSerialNumberSerializer(serializers.ModelSerializer):
     class Meta:
         model = Instrument
-        fields = ['serial_number', 'avatar', 'instrument_type']
+        fields = ['serial_number', 'avatar', 'instrument_type', 'name']
 
 
 class DashboarDeploymentSerializer(serializers.ModelSerializer):
@@ -52,8 +52,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'first_name', 'last_name', 'username', 'email',
-                  'avatar', 'email', 'date_joined', 'is_staff']
+        fields = ['id', 'first_name', 'last_name', 'email',
+                  'avatar', 'email', 'date_joined', 'is_staff', 'last_login', 'password']
 
     def get_avatar(self, obj):
         avatar = 'https://api.dicebear.com/6.x/bottts/png?seed=Snickers'

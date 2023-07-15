@@ -1,6 +1,7 @@
 import json
 import re
 import uuid
+from functools import partial
 from os import stat
 
 from authentication.http_cookie_authentication import CookieTokenAuthentication
@@ -90,6 +91,25 @@ class UserEndpoint(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all()
 
+    def create(self, request, *args, **kwargs):
+        data = request.data.copy()
+        print(data)
+        try:
+            user = User.objects.create_user(
+                username=str(uuid.uuid4()),
+                first_name=data['first_name'],
+                last_name=data['last_name'],
+                email=data['email'],
+                password=data['password'],
+                is_staff=data['is_staff']
+            )
+            print(user)
+            return Response('User successfully created', status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            print(e)
+            return Response('There was a problem creating this user', status=status.HTTP_400_BAD_REQUEST)
+
 
 class DashboardDeploymentMigration(viewsets.ModelViewSet):
 
@@ -139,6 +159,7 @@ class DashboardDeployments(viewsets.ModelViewSet):
         user_profile = self.queryset.get(user=self.request.user)
         dashboard_deployments = deployment_permissions_filter(self,
                                                               user_profile.dashboard_deployments.all())
+        ordered_set = dashboard_deployments.order_by('name').order_by('status')
         serializer = DashboarDeploymentSerializer(
-            dashboard_deployments, many=True)
+            ordered_set, many=True)
         return Response(serializer.data)
