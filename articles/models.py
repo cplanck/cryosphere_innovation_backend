@@ -1,3 +1,5 @@
+from tokenize import blank_re
+
 from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
@@ -15,10 +17,16 @@ class Article_tags(models.Model):
         return self.tag_name
 
 
+class ArticleImages(models.Model):
+    location = models.ImageField(null=True, blank=True,
+                                 upload_to='articles/images')
+    article_id = models.IntegerField(null=True, blank=True)
+
+
 class Article(models.Model):
     title = models.CharField(max_length=500, blank=True, null=True)
     slug = models.SlugField(max_length=500, null=True, blank=True)
-    path = models.SlugField(max_length=500, null=True, blank=True)
+    path = models.CharField(max_length=500, null=True, blank=True)
     status_choices = [('Draft', 'Draft'), ('Published', 'Published'),
                       ('Archived', 'Archived'), ('Internal', 'Internal')]
     status = models.CharField(choices=status_choices,

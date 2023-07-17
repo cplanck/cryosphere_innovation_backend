@@ -6,8 +6,11 @@ from articles.endpoints import *
 
 router = routers.DefaultRouter()
 
+router.register('images', ArticleImageEndpoint, basename='article_images')
+
 router.register('', ArticleEndpoint,
                 basename='articles')
+
 
 urlpatterns = [
     path('', include(router.urls)),

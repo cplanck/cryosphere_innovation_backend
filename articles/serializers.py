@@ -7,11 +7,19 @@ class ArticleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Article
-        fields = ['title', 'heading', 'image', 'slug']
+        fields = ['id', 'title', 'heading', 'status',
+                  'image', 'slug', 'published_date']
 
 
 class ArticleDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Article
+        fields = '__all__'
+
+
+class ArticleImageSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ArticleImages
         fields = '__all__'
