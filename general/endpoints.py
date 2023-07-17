@@ -9,6 +9,9 @@ from rest_framework.permissions import (AllowAny, BasePermission, IsAdminUser,
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from general.models import UpdatesAndChanges
+from general.serializers import *
+
 
 class SendUserEmail(APIView):
 
@@ -22,3 +25,9 @@ class SendUserEmail(APIView):
         )
 
         return Response('I worked!')
+
+
+class UpdatesAndChangesEndpoint(viewsets.ModelViewSet):
+    queryset = UpdatesAndChanges.objects.all()
+    serializer_class = UpdatesAndChangesSerializer
+    # permission_classes = [CookieTokenAuthentication]
