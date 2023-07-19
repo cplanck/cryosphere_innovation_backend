@@ -6,6 +6,7 @@ from general.endpoints import *
 router = routers.DefaultRouter()
 
 router.register('changelog', UpdatesAndChangesEndpoint, basename='changelog')
+router.register('quote', CustomerQuoteEndpoint, basename='quote')
 
 urlpatterns = [
     path('', include(router.urls)),

@@ -9,7 +9,7 @@ from rest_framework.permissions import (AllowAny, BasePermission, IsAdminUser,
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from general.models import UpdatesAndChanges
+from general.models import CustomerQuote, UpdatesAndChanges
 from general.serializers import *
 
 
@@ -28,6 +28,21 @@ class SendUserEmail(APIView):
 
 
 class UpdatesAndChangesEndpoint(viewsets.ModelViewSet):
-    queryset = UpdatesAndChanges.objects.all()
+    queryset = UpdatesAndChanges.objects.all().order_by('-published_date')
     serializer_class = UpdatesAndChangesSerializer
-    # permission_classes = [CookieTokenAuthentication]
+    authentication_classes = [CookieTokenAuthentication]
+
+
+class CustomerQuoteEndpoint(viewsets.ModelViewSet):
+    """
+    This will need to be modified to allow for admin vs. user access
+    """
+    queryset = CustomerQuote.objects.all().order_by('-date_added')
+    serializer_class = CustomerQuoteSerializer
+    authentication_classes = [CookieTokenAuthentication]
+
+    def get_queryset(self):
+        if not self.request.user.is_staff:
+            return self.queryset.filter(user=self.request.user)
+        else:
+            return self.queryset.all()

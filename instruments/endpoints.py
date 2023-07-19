@@ -139,7 +139,6 @@ class InternalDeploymentEndpoint(viewsets.ModelViewSet):
             except:
                 return deployment_permissions_filter(self, self.queryset)
             if check_key_permissions(self, '', permissions):
-                print('YOU MADE IT')
                 return self.queryset
 
         return deployment_permissions_filter(self, self.queryset)

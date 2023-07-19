@@ -1,4 +1,6 @@
+from django.contrib.auth.models import User
 from django.db import models
+from pyexpat import model
 
 
 class UpdatesAndChanges(models.Model):
@@ -11,3 +13,17 @@ class UpdatesAndChanges(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class CustomerQuote(models.Model):
+    user = models.ForeignKey(
+        User, blank=True, null=True, on_delete=models.CASCADE)
+    details = models.JSONField(null=True, blank=True)
+    product = models.CharField(max_length=200, blank=True, null=True)
+    user_submitted = models.BooleanField(null=True, blank=True)
+    quote_file = models.FileField(blank=True, null=True)
+    date_added = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    last_modified = models.DateTimeField(auto_now=True, null=True, blank=True)
+
+    def __str__(self):
+        return self.details['name']

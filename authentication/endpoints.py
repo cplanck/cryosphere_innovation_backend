@@ -17,7 +17,7 @@ from django.utils import timezone
 from dotenv import load_dotenv
 from google.auth.transport import requests
 from google.oauth2 import id_token
-from rest_framework import status
+from rest_framework import pagination, status, viewsets
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -31,6 +31,9 @@ from user_profiles.models import UserProfile
 from user_profiles.serializers import UserProfileSerializer
 
 from authentication.http_cookie_authentication import CookieTokenAuthentication
+
+from .models import APIKey
+from .serializers import *
 
 load_dotenv()
 
@@ -246,3 +249,23 @@ class CreateNewUser(APIView):
         response = prepare_user_response(user, avatar)
 
         return response
+
+
+class GenerateAPIKey(viewsets.ModelViewSet):
+    authentication_classes = [CookieTokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = APIKeySerializer
+    queryset = APIKey.objects.all()
+    lookup_field = 'user_id'
+
+    def create(self, request, *args, **kwargs):
+
+        serializer = self.get_serializer(
+            data={'user': request.user.pk, 'permissions': [{"deployments": []}]})
+
+        if serializer.is_valid():
+            print(serializer.errors)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response('unsuccessful', status=status.HTTP_400_BAD_REQUEST)
