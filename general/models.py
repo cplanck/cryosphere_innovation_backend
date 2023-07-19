@@ -18,6 +18,8 @@ class UpdatesAndChanges(models.Model):
 class CustomerQuote(models.Model):
     user = models.ForeignKey(
         User, blank=True, null=True, on_delete=models.CASCADE)
+    requester_name = models.CharField(blank=True, null=True)
+    requester_email = models.CharField(blank=True, null=True)
     details = models.JSONField(null=True, blank=True)
     product = models.CharField(max_length=200, blank=True, null=True)
     user_submitted = models.BooleanField(null=True, blank=True)

@@ -1,0 +1,32 @@
+from django.core.mail import send_mail
+from django.db.models.signals import post_delete, post_save
+from django.dispatch import receiver
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+
+from .models import *
+
+
+def send_email(instance):
+
+    html_message = render_to_string(
+        'general/quote_request_email.html', {'instance': instance})
+    plain_message = strip_tags(html_message)
+    send_mail(
+        subject="Your SIMB3 quote is on the way 🚀",
+        message=plain_message,
+        from_email='support@cryosphereinnovation.com',
+        recipient_list=[instance.details['requester_email'],
+                        'cjp@cryosphereinnovation.com'],
+        html_message=html_message,
+        fail_silently=False,
+    )
+
+
+@receiver(post_save, sender=CustomerQuote)
+def send_quote_submission_email(sender, instance, created, **kwargs):
+    """
+    Send user a confirmation email that we recieved their SIMB3 quote
+    """
+    if created:
+        send_email(instance)
