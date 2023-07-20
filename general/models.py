@@ -1,3 +1,5 @@
+import uuid
+
 from django.contrib.auth.models import User
 from django.db import models
 from pyexpat import model
@@ -23,9 +25,19 @@ class CustomerQuote(models.Model):
     details = models.JSONField(null=True, blank=True)
     product = models.CharField(max_length=200, blank=True, null=True)
     user_submitted = models.BooleanField(null=True, blank=True)
-    quote_file = models.FileField(blank=True, null=True)
+    quote_file = models.FileField(upload_to='quotes', blank=True, null=True)
     date_added = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     last_modified = models.DateTimeField(auto_now=True, null=True, blank=True)
 
     def __str__(self):
         return self.details['name']
+
+
+class Banner(models.Model):
+    banner_text = models.CharField(blank=True, null=True)
+    banner_link = models.CharField(blank=True, null=True)
+    uuid = models.UUIDField(default=uuid.uuid4)
+    date_added = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+
+    def __str__(self):
+        return self.banner_text

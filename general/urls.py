@@ -7,6 +7,7 @@ router = routers.DefaultRouter()
 
 router.register('changelog', UpdatesAndChangesEndpoint, basename='changelog')
 router.register('quote', CustomerQuoteEndpoint, basename='quote')
+router.register('banner', BannerEndpoint, basename='banner')
 
 urlpatterns = [
     path('', include(router.urls)),

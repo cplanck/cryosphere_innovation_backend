@@ -46,3 +46,9 @@ class CustomerQuoteEndpoint(viewsets.ModelViewSet):
             return self.queryset.filter(user=self.request.user)
         else:
             return self.queryset.all()
+
+
+class BannerEndpoint(viewsets.ModelViewSet):
+    queryset = Banner.objects.all().order_by('-date_added')
+    serializer_class = BannerSerializer
+    authentication_classes = [CookieTokenAuthentication]

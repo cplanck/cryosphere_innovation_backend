@@ -47,7 +47,7 @@ class BaseInstrument(models.Model):
     owner = models.ForeignKey(
         User, on_delete=models.CASCADE, null=True, blank=True)
     avatar = models.ImageField(
-        upload_to='users-media/instruments/avatars', null=True, blank=True)
+        upload_to='instruments/avatars', null=True, blank=True)
     description = models.TextField(max_length=2000, null=True, blank=True)
     notes = models.TextField(max_length=5000, null=True, blank=True)
     details = models.JSONField(blank=True, null=True)

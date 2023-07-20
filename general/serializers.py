@@ -9,7 +9,7 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from rest_framework import exceptions, serializers
 
-from general.models import CustomerQuote, UpdatesAndChanges
+from general.models import *
 
 
 class CustomPasswordResetSerializer(PasswordResetSerializer):
@@ -44,4 +44,11 @@ class CustomerQuoteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomerQuote
+        fields = '__all__'
+
+
+class BannerSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Banner
         fields = '__all__'
