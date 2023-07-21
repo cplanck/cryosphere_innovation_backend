@@ -9,7 +9,7 @@ from rest_framework.permissions import (AllowAny, BasePermission, IsAdminUser,
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from general.models import CustomerQuote, UpdatesAndChanges
+from general.models import *
 from general.serializers import *
 
 
@@ -52,3 +52,8 @@ class BannerEndpoint(viewsets.ModelViewSet):
     queryset = Banner.objects.all().order_by('-date_added')
     serializer_class = BannerSerializer
     authentication_classes = [CookieTokenAuthentication]
+
+
+class UserSurveyEndpoint(viewsets.ModelViewSet):
+    queryset = UserSurvey.objects.all()
+    serializer_class = UserSurveySerializer

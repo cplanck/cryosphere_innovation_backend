@@ -41,3 +41,12 @@ class Banner(models.Model):
 
     def __str__(self):
         return self.banner_text
+
+
+class UserSurvey(models.Model):
+    survey_num = models.IntegerField(null=True, blank=True)
+    result = models.JSONField(null=True, blank=True)
+    date_added = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+
+    def __str__(self):
+        return self.survey_num
