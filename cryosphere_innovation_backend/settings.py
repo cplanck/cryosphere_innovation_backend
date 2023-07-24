@@ -30,7 +30,7 @@ DEBUG = True
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-ALLOWED_HOSTS = ['localhost', 'api.citestingx.com']
+ALLOWED_HOSTS = ['localhost', 'api.cryospherex.com']
 
 WEBSITE_ROOT = os.getenv('WEBSITE_ROOT')
 
