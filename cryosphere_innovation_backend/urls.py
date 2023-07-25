@@ -20,5 +20,5 @@ urlpatterns = [
     path('users/', include('user_profiles.urls')),
     path('general/', include('general.urls')),
     path(r'rest-auth/', include('dj_rest_auth.urls')),
-    path('docs/', include_docs_urls(title='api')),
+    # path('docs/', include_docs_urls(title='api')),
 ]
