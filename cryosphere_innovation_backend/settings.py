@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'general',
     'django_filters',
     'articles',
+    'documentation',
     'storages',
     'algoliasearch_django',
     'django_gsuite_email',
