@@ -50,3 +50,15 @@ class UserSurvey(models.Model):
 
     def __str__(self):
         return self.survey_num
+
+
+class ContactUs(models.Model):
+    subject = models.CharField(max_length=2000, blank=True, null=True)
+    form_results = models.JSONField(null=True, blank=True)
+    seen = models.BooleanField(blank=True, null=True, default=False)
+    user = models.ForeignKey(
+        User, blank=True, null=True, on_delete=models.CASCADE)
+    date_added = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+
+    def __str__(self):
+        return self.subject

@@ -9,6 +9,8 @@ router.register('changelog', UpdatesAndChangesEndpoint, basename='changelog')
 router.register('quote', CustomerQuoteEndpoint, basename='quote')
 router.register('banner', BannerEndpoint, basename='banner')
 router.register('user_survey', UserSurveyEndpoint, basename='user_survey')
+router.register('contact_us', ContactUsEndpoint, basename='contact_us')
+router.register('admin', AdminInfoEndpoint, basename='admin_endpoint')
 
 urlpatterns = [
     path('', include(router.urls)),

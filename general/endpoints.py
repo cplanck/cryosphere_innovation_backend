@@ -1,6 +1,10 @@
+import json
+
 from authentication.http_cookie_authentication import CookieTokenAuthentication
+from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.shortcuts import render
+from instruments.models import Deployment, Instrument, InstrumentSensorPackage
 from rest_framework import pagination, status, viewsets
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import (AllowAny, BasePermission, IsAdminUser,
@@ -55,5 +59,23 @@ class BannerEndpoint(viewsets.ModelViewSet):
 
 
 class UserSurveyEndpoint(viewsets.ModelViewSet):
-    queryset = UserSurvey.objects.all()
+    queryset = UserSurvey.objects.all().order_by('-date_added')
     serializer_class = UserSurveySerializer
+
+
+class ContactUsEndpoint(viewsets.ModelViewSet):
+    queryset = ContactUs.objects.all().order_by('-date_added')
+    serializer_class = ContactUsSerializer
+
+
+class AdminInfoEndpoint(viewsets.ViewSet):
+    def list(self, request):
+        deployments = Deployment.objects.count()
+        instruments = Instrument.objects.count()
+        users = User.objects.count()
+        sensor_packages = InstrumentSensorPackage.objects.count()
+        unseen_contact_forms = ContactUs.objects.filter(seen=False).count()
+        user_survey_count = UserSurvey.objects.count()
+        response = {'deployments': deployments,
+                    'instruments': instruments, 'users': users, 'sensor_packages': sensor_packages, 'unseen_contact_forms': str(unseen_contact_forms), 'user_survey_count': str(user_survey_count)}
+        return Response(response, status=status.HTTP_200_OK)

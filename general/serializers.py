@@ -59,3 +59,10 @@ class UserSurveySerializer(serializers.ModelSerializer):
     class Meta:
         model = UserSurvey
         fields = '__all__'
+
+
+class ContactUsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ContactUs
+        fields = '__all__'
