@@ -5,12 +5,11 @@ from documentation.endpoints import *
 
 router = routers.DefaultRouter()
 
-router.register('images', DocumentImageEndpoint,
-                basename='documentation_images')
+router.register('media', DocumentMediaEndpoint,
+                basename='documentation_media')
 
 router.register('', DocumentEndpoint,
                 basename='document')
-
 
 urlpatterns = [
     path('', include(router.urls)),

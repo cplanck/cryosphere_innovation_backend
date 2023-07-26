@@ -1,3 +1,5 @@
+import os
+import uuid
 from tokenize import blank_re
 
 from django.contrib.auth.models import User
@@ -17,10 +19,25 @@ class Document_tags(models.Model):
         return self.tag_name
 
 
-class DocumentImages(models.Model):
-    location = models.ImageField(null=True, blank=True,
-                                 upload_to='documentation/images')
-    documentation_id = models.IntegerField(null=True, blank=True)
+def custom_filename(instance, filename):
+    """
+    Function to generate a custom filename for the uploaded image.
+    """
+    unique_filename = f"documentation/media/{uuid.uuid4()}_{filename}"
+    return unique_filename
+
+
+class DocumentMedia(models.Model):
+    location = models.FileField(null=True, blank=True,
+                                upload_to=custom_filename)
+    type = models.CharField(blank=True, null=True)
+    size = models.CharField(blank=True, null=True)
+    date_added = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+
+    def delete(self, *args, **kwargs):
+        if self.location:
+            self.location.delete(save=False)
+        super(DocumentMedia, self).delete(*args, **kwargs)
 
 
 class Document(models.Model):

@@ -18,8 +18,8 @@ class DocumentDetailSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class DocumentImageSerializer(serializers.ModelSerializer):
+class DocumentMediaSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = DocumentImages
+        model = DocumentMedia
         fields = '__all__'

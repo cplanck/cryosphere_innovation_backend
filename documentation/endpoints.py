@@ -1,9 +1,14 @@
+import boto3
 from authentication.http_cookie_authentication import CookieTokenAuthentication
+from botocore.session import Session
+from dotenv import load_dotenv
 from rest_framework import pagination, status, viewsets
 from rest_framework.response import Response
 
 from documentation.models import *
 from documentation.serializers import *
+
+load_dotenv()
 
 
 class DocumentPagination(pagination.PageNumberPagination):
@@ -34,14 +39,14 @@ class DocumentEndpoint(viewsets.ModelViewSet):
             return self.queryset.filter(status='Published')
 
 
-class DocumentImageEndpoint(viewsets.ModelViewSet):
-    queryset = DocumentImages.objects.all()
-    serializer_class = DocumentImageSerializer
+class DocumentMediaEndpoint(viewsets.ModelViewSet):
+    queryset = DocumentMedia.objects.all().order_by('-date_added')
+    serializer_class = DocumentMediaSerializer
 
     def create(self, request):
+        media = DocumentMedia(
+            location=request.FILES['file'], type=request.data['type'], size=request.data['size'])
+        media.save()
+        file_url = media.location.url
 
-        image = DocumentImages(location=request.FILES['file'])
-        image.save()
-        file_url = image.location.url
-
-        return Response({'location': file_url}, status=status.HTTP_201_CREATED)
+        return Response({'location': file_url, 'size': request.data['size'], 'type': request.data['type']}, status=status.HTTP_201_CREATED)
