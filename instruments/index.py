@@ -1,7 +1,7 @@
 import algoliasearch_django as algoliasearch
 from algoliasearch_django import AlgoliaIndex
 from algoliasearch_django.decorators import register
-from articles.models import Article
+from documentation.models import Document
 
 from .models import Deployment, Instrument
 from .serializers import *
@@ -30,4 +30,4 @@ class DeploymentModelIndex(AlgoliaIndex):
 
 
 algoliasearch.register(Instrument)
-algoliasearch.register(Article)
+algoliasearch.register(Document)
