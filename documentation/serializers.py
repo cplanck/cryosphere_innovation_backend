@@ -8,7 +8,7 @@ class DocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Document
         fields = ['id', 'title', 'heading', 'status',
-                  'image', 'slug', 'published_date']
+                  'image', 'slug', 'published_date', 'type', 'category']
 
 
 class DocumentDetailSerializer(serializers.ModelSerializer):
