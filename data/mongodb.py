@@ -1,6 +1,7 @@
 import os
 from urllib import response
 
+from bson import ObjectId
 from dotenv import load_dotenv
 from pymongo.errors import BulkWriteError
 from pymongo.mongo_client import MongoClient
@@ -67,17 +68,23 @@ def get_data_from_mongodb(collection_name, fields=None):
     response = []
     if fields:
         projection = {field_name: 1 for field_name in fields}
-        projection['_id'] = 0
+        projection['_id'] = 1
         documents = collection.find({}, projection).sort('time_stamp', 1)
     else:
         documents = collection.find(
-            {}, {'_id': 0, 'uniqueID': 0}).sort('time_stamp', 1)
+            {}, {'_id': 1, 'uniqueID': 0}).sort('time_stamp', 1)
 
     for document in documents:
+        document['_id'] = str(document['_id'])
         response.append(document)
 
     return response
 
+def delete_objects_from_mongo_db_collection_by_id(collection_name, object_id_array):
+    collection = db[collection_name]
+    formatted_object_ids = [ObjectId(oid) for oid in object_id_array]
+    result = collection.delete_many({"_id": {"$in": formatted_object_ids}})
+    return result.deleted_count
 
 def delete_all_data_from_mongodb_collection(collection_name):
     collection = db[collection_name]

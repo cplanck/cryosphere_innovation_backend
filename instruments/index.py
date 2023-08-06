@@ -25,7 +25,7 @@ class DeploymentModelIndex(AlgoliaIndex):
     }
 
     def get_queryset(self):
-        queryset = Deployment.objects.exclude(private=True)
+        queryset = Deployment.objects.exclude(private=True).exclude(searchable=False)
         return queryset
 
 

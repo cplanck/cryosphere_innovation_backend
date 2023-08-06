@@ -52,7 +52,6 @@ class BaseInstrument(models.Model):
     notes = models.TextField(max_length=5000, null=True, blank=True)
     details = models.JSONField(blank=True, null=True)
     instrument_type = models.CharField(max_length=200, null=True, blank=True)
-    internal = models.BooleanField(default=False)
     date_added = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     last_modified = models.DateTimeField(auto_now=True, null=True, blank=True)
 
@@ -86,6 +85,7 @@ class BaseDeployment(models.Model):
     details = models.JSONField(blank=True, null=True)
     collaborators = models.ManyToManyField(
         User, related_name='collaborators', blank=True)
+    searchable = models.BooleanField(blank=True, null=True, default=False)
     starred = models.BooleanField(default=False, null=True, blank=True)
     starred_date = models.DateTimeField(null=True, blank=True)
     date_added = models.DateTimeField(auto_now_add=True, null=True)

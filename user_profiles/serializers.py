@@ -24,14 +24,13 @@ class DashboarDeploymentSerializer(serializers.ModelSerializer):
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    # avatar = serializers.SerializerMethodField()
     dashboard_deployments = DashboarDeploymentSerializer(
         many=True, read_only=True)
 
     class Meta:
         model = UserProfile
         fields = ['user', 'full_name', 'social_login',
-                  'has_social_avatar', 'dashboard_deployments', 'id']
+                  'has_social_avatar', 'dashboard_deployments', 'id', 'beta_tester']
 
     def get_avatar(self, obj):
         avatar = ''
@@ -48,16 +47,23 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+
     avatar = serializers.SerializerMethodField()
+    beta_tester = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = ['id', 'first_name', 'last_name', 'email',
-                  'avatar', 'email', 'date_joined', 'is_staff', 'last_login', 'password']
+                  'avatar', 'email', 'date_joined', 'is_staff', 'last_login', 'password', 'beta_tester']
 
     def get_avatar(self, obj):
         avatar = 'https://api.dicebear.com/6.x/bottts/png?seed=Snickers'
         return avatar
+
+    def get_beta_tester(self, obj):
+        print('USER SERIALIZER CALLED')
+        beta_tester = obj.userprofile.beta_tester
+        return beta_tester
 
 
 class UserModelSerializer(serializers.ModelSerializer):

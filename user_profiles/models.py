@@ -1,3 +1,5 @@
+from math import fabs
+
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import ImageField
@@ -12,6 +14,7 @@ class UserProfile(models.Model):
     robot = models.CharField(default='Snickers', blank=True, null=True)
     social_login = models.BooleanField(null=True, blank=True)
     has_social_avatar = models.BooleanField(null=True, blank=True)
+    beta_tester = models.BooleanField(null=True, blank=True, default=False)
     has_made_deployment = models.BooleanField(null=True, blank=True)
     has_made_instrument = models.BooleanField(null=True, blank=True)
     dashboard_deployments = models.ManyToManyField(

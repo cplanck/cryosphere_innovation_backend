@@ -23,27 +23,25 @@ from .serializers import (DeploymentGETSerializer, DeploymentSerializer,
                           InstrumentSerializer)
 
 
+class UserInstrumentSensorPackageEndpoint(viewsets.ModelViewSet):
+    authentication_classes = [CookieTokenAuthentication]
+    serializer_class = InstrumentSensorPackageSerializer
+    queryset = InstrumentSensorPackage.objects.all().order_by('-last_modified')
+
+    def get_queryset(self):
+        queryset = self.queryset.filter(user=self.request.user)
+        return queryset
+
 class InstrumentPagination(pagination.PageNumberPagination):
     page_size = 100
     page_size_query_param = 'page_size'
     max_page_size = 100
 
 
-class InternalInstrumentEndpoint(viewsets.ModelViewSet):
+class UserInstrumentEndpoint(viewsets.ModelViewSet):
     """
-    Endpoint for CRUD on Instrument model for internally made
-    instruments, e.g., SIMB3. The create() method is only available
-    to staff users. list() returns a paginated response of istruments
-    with internal = True.
-
-    If an instrument has a deployment that with private=True, then it is
-    automatically removed from public view unless the user viewing is either
-    1) the owner of the instrument or 2) listed in the collaborators.
-
-
-    The main purpose of this endpoint is for consumption by the CI frontend.
-    It largely replaces the SIMB3 endpoint and instead returns all internal
-    instruments.
+    Endpoint for user created instruments
+    Added 4 August 2023
     """
     authentication_classes = [CookieTokenAuthentication, JWTAuthentication]
     serializer_class = InstrumentSerializer
@@ -51,9 +49,7 @@ class InternalInstrumentEndpoint(viewsets.ModelViewSet):
     queryset = Instrument.objects.order_by('-last_modified')
 
     def create(self, request):
-
-        if request.user.is_staff:
-            request.data._mutable = True
+        if request.user.userprofile.beta_tester:
             serializer = self.get_serializer(data=request.data)
 
             if serializer.is_valid():
@@ -65,9 +61,11 @@ class InternalInstrumentEndpoint(viewsets.ModelViewSet):
                 print(errors)
                 return Response('There was a problem with your request', status=status.HTTP_400_BAD_REQUEST)
         else:
-
             return Response(status=status.HTTP_401_UNAUTHORIZED)
-
+    
+    def get_queryset(self):
+        queryset = self.queryset.filter(owner=self.request.user)
+        return queryset
 
 def check_key_permissions(self, pk, permissions):
     if '__all__' in permissions:
@@ -84,22 +82,11 @@ class DeploymentPagination(pagination.PageNumberPagination):
     max_page_size = 1000
 
 
-class InternalDeploymentEndpoint(viewsets.ModelViewSet):
+class UserDeploymentEndpoint(viewsets.ModelViewSet):
 
     """
-    Endpoint for returning users deployments, either all or by ID. Handles
-    all CRUD. For GET requests it returns an instrument object with each
-    deployment. For POST/PUT/PATCH requests it accepts only an ID for instrument.
-
-    This endpoint does a couple things
-    -Return deployment(s) when given an instrument_id as a query param (main use cases for CI frontend)
-    -Return the list of deployments that meet the following criteria
-        - Are public (private=False)
-        - Are of instruments they are listed as owners on
-        - Are deployments that they are listed as collaborators on
-
-    As of 2 June, 2023
-    -Need to add authentication
+    Endpoint for CRUD on user created deployments
+    Added 5 August 2023
     """
 
     authentication_classes = [CookieTokenAuthentication]
@@ -116,7 +103,7 @@ class InternalDeploymentEndpoint(viewsets.ModelViewSet):
 
     def create(self, request):
 
-        if request.user.is_staff:
+        if request.user.userprofile.beta_tester:
             serializer = self.get_serializer(data=request.data)
             if serializer.is_valid():
                 self.perform_create(serializer)
@@ -128,18 +115,8 @@ class InternalDeploymentEndpoint(viewsets.ModelViewSet):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
     def get_queryset(self):
-        # Check if Authorization key was passed (for machine permissions).
-        if 'Authorization' in self.request.headers:
-            try:
-                permissions = APIKey.objects.get(
-                    key=self.request.headers['Authorization']).permissions[0]['deployments']
-
-            except:
-                return deployment_permissions_filter(self, self.queryset)
-            if check_key_permissions(self, '', permissions):
-                return self.queryset
-
-        return deployment_permissions_filter(self, self.queryset)
+        queryset = self.queryset.filter(instrument__owner=self.request.user)
+        return queryset
 
 
 def strip_data_ends(data, strip_from_start, strip_from_end):
@@ -151,58 +128,63 @@ def strip_data_ends(data, strip_from_start, strip_from_end):
     return data
 
 
-class InternalDataEndpoint(viewsets.ViewSet):
+class UserDataEndpoint(viewsets.ViewSet):
 
     """
-    Main deployment data CRUD endpoint. Accepts get/patch requests with a PK (data_uuid)
-    specified. 
+    Endpoint for CRUD on user deployment data from the frontend. 
 
-    GET requests return the entire data
-    Patch requests (for adding data to the MongoDB) require an API key with valid permissions.
-    The permissions is a JSON where the data_uuid must be in the  deployments list, 
-    ie., deployment : [data_uuid_1, data_uuid_2]
-
-    Written 12 June 2023
+    Added 5 August 2023
     """
     authentication_classes = [CookieTokenAuthentication]
 
-    def list(self, request):
-        return Response('Method not allowed. You likely forgot to include a /data_uuid in your URI.', status=status.HTTP_400_BAD_REQUEST)
-
-    def retrieve(self, request, pk=None):
-        queryset = deployment_permissions_filter(
-            self,  Deployment.objects.all()).filter(data_uuid=pk)
-
-        if queryset:
-            strip_ends = queryset.values_list(
-                'rows_from_start', 'rows_from_end')
-            rows_from_start = strip_ends[0][0]
-            rows_from_end = strip_ends[0][1]
-            fields = request.query_params.getlist('field')
-            data = get_data_from_mongodb(pk, fields)
-            stripped_data = strip_data_ends(
-                data, rows_from_start, rows_from_end)
-            return Response(stripped_data, status=status.HTTP_200_OK)
-        else:
-            return Response('You don\'t have permission to perform this action.', status=status.HTTP_401_UNAUTHORIZED)
-
     def partial_update(self, request, pk):
-        try:
-            key = self.request.headers['Authorization']
-        except:
-            return Response('Invalid API key. You might have a malformed Authorization header.', status=status.HTTP_400_BAD_REQUEST)
-        try:
-            permissions = APIKey.objects.get(
-                key=key).permissions[0]['deployments']
-        except:
-            return Response('Bad API key', status=status.HTTP_400_BAD_REQUEST)
+        post_data_to_mongodb_collection(pk, request.data)
+        return Response('Test endpoint', status=status.HTTP_200_OK)
 
-        if check_key_permissions(self, pk, permissions):
-            response = post_data_to_mongodb_collection(pk, request.data)
-            return Response(response, status=status.HTTP_201_CREATED)
-        else:
-            return Response('API key is either invalid or key doesnt have permissions.',
-                            status=status.HTTP_400_BAD_REQUEST)
+    def destroy(self, request, pk):
+        delete_count = delete_objects_from_mongo_db_collection_by_id(pk, request.data)
+        print('DELETE COUNT')
+        print(request.data)
+        print(delete_count)
+        return Response({'is this': 'a json'}, status=status.HTTP_204_NO_CONTENT)
+
+    # def list(self, request):
+    #     return Response('Method not allowed. You likely forgot to include a /data_uuid in your URI.', status=status.HTTP_400_BAD_REQUEST)
+
+    # def retrieve(self, request, pk=None):
+    #     queryset = deployment_permissions_filter(
+    #         self,  Deployment.objects.all()).filter(data_uuid=pk)
+
+    #     if queryset:
+    #         strip_ends = queryset.values_list(
+    #             'rows_from_start', 'rows_from_end')
+    #         rows_from_start = strip_ends[0][0]
+    #         rows_from_end = strip_ends[0][1]
+    #         fields = request.query_params.getlist('field')
+    #         data = get_data_from_mongodb(pk, fields)
+    #         stripped_data = strip_data_ends(
+    #             data, rows_from_start, rows_from_end)
+    #         return Response(stripped_data, status=status.HTTP_200_OK)
+    #     else:
+    #         return Response('You don\'t have permission to perform this action.', status=status.HTTP_401_UNAUTHORIZED)
+
+    # def partial_update(self, request, pk):
+    #     try:
+    #         key = self.request.headers['Authorization']
+    #     except:
+    #         return Response('Invalid API key. You might have a malformed Authorization header.', status=status.HTTP_400_BAD_REQUEST)
+    #     try:
+    #         permissions = APIKey.objects.get(
+    #             key=key).permissions[0]['deployments']
+    #     except:
+    #         return Response('Bad API key', status=status.HTTP_400_BAD_REQUEST)
+
+    #     if check_key_permissions(self, pk, permissions):
+    #         response = post_data_to_mongodb_collection(pk, request.data)
+    #         return Response(response, status=status.HTTP_201_CREATED)
+    #     else:
+    #         return Response('API key is either invalid or key doesnt have permissions.',
+    #                         status=status.HTTP_400_BAD_REQUEST)
 
 
 class InstrumentSensorPackageEndpoint(viewsets.ModelViewSet):
@@ -225,7 +207,9 @@ class SIMB3MigrationEndpoint(viewsets.ModelViewSet):
 
     def create(self, request):
 
+        print(request.data)
         data = request.data
+        data['internal'] = True
         serializer = self.get_serializer(data=data)
 
         if serializer.is_valid():

@@ -93,9 +93,8 @@ class UserEndpoint(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         data = request.data.copy()
-        print(data)
         try:
-            user = User.objects.create_user(
+            User.objects.create_user(
                 username=str(uuid.uuid4()),
                 first_name=data['first_name'],
                 last_name=data['last_name'],
@@ -103,7 +102,6 @@ class UserEndpoint(viewsets.ModelViewSet):
                 password=data['password'],
                 is_staff=data['is_staff']
             )
-            print(user)
             return Response('User successfully created', status=status.HTTP_201_CREATED)
 
         except Exception as e:
