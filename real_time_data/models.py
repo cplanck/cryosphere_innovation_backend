@@ -13,11 +13,11 @@ class DecodeScript(models.Model):
 
 
 class RealTimeData(models.Model):
-    deployment = models.OneToOneField(Deployment, on_delete=models.CASCADE)
-    active = models.BooleanField(default=False)
+    deployment = models.OneToOneField(Deployment, on_delete=models.CASCADE, blank=True)
+    active = models.BooleanField(default=False, blank=True)
     iridium_sbd = models.BooleanField(default=True, null=True, blank=True)
     iridium_imei = models.CharField(null=True, blank=True)
-    decode_script = models.ForeignKey(DecodeScript, null=True, on_delete=models.SET_NULL)
+    decode_script = models.ForeignKey(DecodeScript, null=True, on_delete=models.SET_NULL, blank=True)
     error = models.CharField(blank=True, null=True)
     updated = models.DateTimeField(blank=True, null=True)
     date_added = models.DateTimeField(auto_now_add=True, null=True)
