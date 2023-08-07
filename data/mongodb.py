@@ -83,7 +83,8 @@ def get_data_from_mongodb(collection_name, fields=None):
 def delete_objects_from_mongo_db_collection_by_id(collection_name, object_id_array):
     collection = db[collection_name]
     formatted_object_ids = [ObjectId(oid) for oid in object_id_array]
-    result = collection.delete_many({"_id": {"$in": formatted_object_ids}})
+    object_id_array.extend(formatted_object_ids)
+    result = collection.delete_many({"_id": {"$in": object_id_array}})
     return result.deleted_count
 
 def delete_all_data_from_mongodb_collection(collection_name):

@@ -132,7 +132,6 @@ class UserDataEndpoint(viewsets.ViewSet):
 
     """
     Endpoint for CRUD on user deployment data from the frontend. 
-
     Added 5 August 2023
     """
     authentication_classes = [CookieTokenAuthentication]
@@ -143,30 +142,28 @@ class UserDataEndpoint(viewsets.ViewSet):
 
     def destroy(self, request, pk):
         delete_count = delete_objects_from_mongo_db_collection_by_id(pk, request.data)
-        print('DELETE COUNT')
-        print(request.data)
-        print(delete_count)
-        return Response({'is this': 'a json'}, status=status.HTTP_204_NO_CONTENT)
+        return Response({'delete_count': delete_count}, status=status.HTTP_200_OK)
 
-    # def list(self, request):
-    #     return Response('Method not allowed. You likely forgot to include a /data_uuid in your URI.', status=status.HTTP_400_BAD_REQUEST)
+    def list(self, request):
+        print('LIST METHOD CALLED')
+        return Response('Method not allowed. You likely forgot to include a /data_uuid in your URI.', status=status.HTTP_400_BAD_REQUEST)
 
-    # def retrieve(self, request, pk=None):
-    #     queryset = deployment_permissions_filter(
-    #         self,  Deployment.objects.all()).filter(data_uuid=pk)
+    def retrieve(self, request, pk=None):
+        queryset = deployment_permissions_filter(
+            self,  Deployment.objects.all()).filter(data_uuid=pk)
 
-    #     if queryset:
-    #         strip_ends = queryset.values_list(
-    #             'rows_from_start', 'rows_from_end')
-    #         rows_from_start = strip_ends[0][0]
-    #         rows_from_end = strip_ends[0][1]
-    #         fields = request.query_params.getlist('field')
-    #         data = get_data_from_mongodb(pk, fields)
-    #         stripped_data = strip_data_ends(
-    #             data, rows_from_start, rows_from_end)
-    #         return Response(stripped_data, status=status.HTTP_200_OK)
-    #     else:
-    #         return Response('You don\'t have permission to perform this action.', status=status.HTTP_401_UNAUTHORIZED)
+        if queryset:
+            strip_ends = queryset.values_list(
+                'rows_from_start', 'rows_from_end')
+            rows_from_start = strip_ends[0][0]
+            rows_from_end = strip_ends[0][1]
+            fields = request.query_params.getlist('field')
+            data = get_data_from_mongodb(pk, fields)
+            stripped_data = strip_data_ends(
+                data, rows_from_start, rows_from_end)
+            return Response(stripped_data, status=status.HTTP_200_OK)
+        else:
+            return Response('You don\'t have permission to perform this action.', status=status.HTTP_401_UNAUTHORIZED)
 
     # def partial_update(self, request, pk):
     #     try:

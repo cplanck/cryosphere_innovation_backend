@@ -54,7 +54,7 @@ INSTALLED_APPS = [
     'user_profiles',
     'general',
     'django_filters',
-    # 'articles',
+    'real_time_data',
     'documentation',
     'storages',
     'algoliasearch_django',
