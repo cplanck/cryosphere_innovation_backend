@@ -26,3 +26,5 @@ class RealTimeDataEndpoint(viewsets.ModelViewSet):
     authentication_classes = [CookieTokenAuthentication]
     queryset = RealTimeData.objects.all().order_by('-last_modified')
     serializer_class = RealTimeDataSerializer
+    filterset_fields = ['active']
+

@@ -5,4 +5,4 @@ class RealTimeDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = RealTimeData
         fields = '__all__'
-        depth = 1
+        depth = 2
