@@ -13,10 +13,20 @@ class SensorPackageInstrumentSerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
 class DeploymentInstrumentOwnerSerializer(serializers.ModelSerializer):
-
+    avatar = serializers.SerializerMethodField()
+    
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email']
+        fields = ['first_name', 'last_name', 'email', 'avatar']
+    
+    def get_avatar(self, obj):
+        if obj.userprofile.avatar:
+            return obj.userprofile.avatar.url
+        if obj.userprofile.google_avatar:
+            return obj.userprofile.google_avatar
+        else:
+            return f'https://api.dicebear.com/6.x/identicon/png?scale=70&seed={obj.userprofile.robot}'
+
 
 class InstrumentSerializer(serializers.ModelSerializer):
 

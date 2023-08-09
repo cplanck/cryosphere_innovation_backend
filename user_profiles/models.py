@@ -11,6 +11,7 @@ class UserProfile(models.Model):
     full_name = models.CharField(max_length=100, null=True, blank=True)
     avatar = models.ImageField(
         upload_to='users/avatars', null=True, blank=True)
+    google_avatar = models.CharField(blank=True, null=True)
     robot = models.CharField(default='Snickers', blank=True, null=True)
     social_login = models.BooleanField(null=True, blank=True)
     has_social_avatar = models.BooleanField(null=True, blank=True)

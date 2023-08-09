@@ -84,9 +84,10 @@ class GoogleOneTap(APIView):
                     else:
                         # this will cause an error if it doesn't exist
                         avatar = user_info_from_google['picture']
+                        user_profile.google_avatar = avatar
+                        user_profile.save()
                 except:
-                    avatar = f'https://api.dicebear.com/6.x/bottts/png?seed={user_profile.robot}'
-                    # Also check if a users uploaded an avatar...
+                    avatar = f'https://api.dicebear.com/6.x/identicon/png?scale=70&seed={user_profile.robot}'
 
                 login(
                     request, user, backend='authentication.email_authentication_backend.EmailBackend')
@@ -100,10 +101,19 @@ class GoogleOneTap(APIView):
                 user.set_unusable_password()
 
                 user_profile = UserProfile.objects.get(user=user)
-                robot_avatars = ['Snickers', 'Mimi', 'Boots',
-                                 'Whiskers', 'Jasper', 'Gizmo', 'Jasmine', 'Scooter']
-                user_profile.robot = random.choice(robot_avatars)
+
+                dice_bear_avatar = ['Maggie', 'Mittens', 'Mia',
+                                 'Pumpkin', 'Peanut', 'Socks', 'Jasmine', 'Snickers']
+                user_profile.robot = random.choice(dice_bear_avatar)
                 user_profile.social_login = True
+
+                try:
+                    avatar = user_info_from_google['picture']
+                    user_profile.google_avatar = avatar
+                except:
+                    avatar = f'https://api.dicebear.com/6.x/identicon/png?scale=70&seed={user_profile.robot}'
+                    user_profile.google_avatar = None
+
                 user_profile.save()
 
                 try:
@@ -118,11 +128,6 @@ class GoogleOneTap(APIView):
                     user.first_name = 'no_family_name'
 
                 user.save()
-                try:
-                    avatar = user_info_from_google['picture']
-                except:
-                    avatar = f'https://api.dicebear.com/6.x/bottts/png?seed={user_profile.robot}'
-
                 login(
                     request, user, backend='authentication.email_authentication_backend.EmailBackend')
                 response = prepare_user_response(user, avatar)
@@ -154,7 +159,7 @@ class StandardLogin(APIView):
                 if user_profile.avatar:
                     avatar = user_profile.avatar.url
                 else:
-                    avatar = f'https://api.dicebear.com/6.x/bottts/png?seed={user_profile.robot}'
+                    avatar = f'https://api.dicebear.com/6.x/identicon/png?scale=70&seed={user_profile.robot}'
                 login(
                     request, user, backend='authentication.email_authentication_backend.EmailBackend')
                 response = prepare_user_response(user, avatar)
@@ -210,8 +215,6 @@ class CreateNewUser(APIView):
         first_name = request.data.get('first_name')
         last_name = request.data.get('last_name')
 
-        print(request.data)
-
         if not all([username, email, password]):
             return Response({'error': 'Please provide an email and a password.'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -240,12 +243,12 @@ class CreateNewUser(APIView):
             return Response({'error': 'You likely forgot to specify your first or last name'}, status=status.HTTP_400_BAD_REQUEST)
 
         user_profile = UserProfile.objects.get(user=user)
-        robot_avatars = ['Snickers', 'Mimi', 'Boots',
-                         'Whiskers', 'Jasper', 'Gizmo', 'Jasmine', 'Scooter']
-        user_profile.robot = random.choice(robot_avatars)
+        dice_bear_avatar = ['Maggie', 'Mittens', 'Mia',
+                                 'Pumpkin', 'Peanut', 'Socks', 'Jasmine', 'Snickers']
+        user_profile.robot = random.choice(dice_bear_avatar)
         user_profile.save()
 
-        avatar = f'https://api.dicebear.com/6.x/bottts/png?seed={user_profile.robot}'
+        avatar = f'https://api.dicebear.com/6.x/identicon/png?scale=70&seed={user_profile.robot}'
         response = prepare_user_response(user, avatar)
 
         return response

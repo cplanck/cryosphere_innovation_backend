@@ -32,19 +32,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = ['user', 'full_name', 'social_login',
                   'has_social_avatar', 'dashboard_deployments', 'id', 'beta_tester']
 
-    def get_avatar(self, obj):
-        avatar = ''
-        if obj.has_social_avatar:
-            social_avatar = ''  # THIS NEEDS TO BE FIXED AS WE MOVE TO ONE-TAP LOGIN!
-            if social_avatar:
-                avatar = social_avatar
-        elif obj.avatar:
-            avatar = obj.avatar.url
-        else:
-            avatar = 'https://ui-avatars.com/api/?name=' + \
-                obj.user.first_name + '+' + obj.user.last_name
-        return avatar
-
 
 class UserSerializer(serializers.ModelSerializer):
 
@@ -55,13 +42,16 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'first_name', 'last_name', 'email',
                   'avatar', 'email', 'date_joined', 'is_staff', 'last_login', 'password', 'beta_tester']
-
+        
     def get_avatar(self, obj):
-        avatar = 'https://api.dicebear.com/6.x/bottts/png?seed=Snickers'
-        return avatar
+        if obj.userprofile.avatar:
+            return obj.userprofile.avatar.url
+        if obj.userprofile.google_avatar:
+            return obj.userprofile.google_avatar
+        else:
+            return f'https://api.dicebear.com/6.x/identicon/png?scale=70&seed={obj.userprofile.robot}'
 
     def get_beta_tester(self, obj):
-        print('USER SERIALIZER CALLED')
         beta_tester = obj.userprofile.beta_tester
         return beta_tester
 
