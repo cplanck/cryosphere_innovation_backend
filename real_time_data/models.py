@@ -18,6 +18,7 @@ class RealTimeData(models.Model):
     iridium_sbd = models.BooleanField(default=True, null=True, blank=True)
     iridium_imei = models.CharField(null=True, blank=True)
     decode_script = models.ForeignKey(DecodeScript, null=True, on_delete=models.SET_NULL, blank=True)
+    decoding = models.BooleanField(blank=True, null=True, default=False)
     error = models.CharField(blank=True, null=True)
     updated = models.DateTimeField(blank=True, null=True)
     date_added = models.DateTimeField(auto_now_add=True, null=True)
