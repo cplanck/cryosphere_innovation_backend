@@ -11,8 +11,8 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from instruments.base_models import InstrumentSensorPackage
 
-from .models import RealTimeData
-from .serializers import (RealTimeDataSerializer,)
+from .models import RealTimeData, DecodeScript
+from .serializers import (RealTimeDataSerializer, DecodeScriptSerializer)
 
 
 class RealTimeDataEndpoint(viewsets.ModelViewSet):
@@ -28,3 +28,14 @@ class RealTimeDataEndpoint(viewsets.ModelViewSet):
     serializer_class = RealTimeDataSerializer
     filterset_fields = ['active']
 
+class DecodeScriptsEndpoint(viewsets.ModelViewSet):
+
+    """
+    Endpoint for CRUD on the decode-script model. The decode-scripts
+    dynamically define Python functions which are used by the Lambda
+    functions for decoding SBD binary files.  
+    """
+
+    authentication_classes = [CookieTokenAuthentication]
+    queryset = DecodeScript.objects.all().order_by('-last_modified')
+    serializer_class = DecodeScriptSerializer

@@ -5,8 +5,12 @@ from real_time_data.endpoints import *
 
 router = routers.DefaultRouter()
 
+router.register('decode-scripts', DecodeScriptsEndpoint,
+                basename='decode-scripts')
+
 router.register('', RealTimeDataEndpoint,
                 basename='real_time_data')
+
 
 urlpatterns = [
     path('', include(router.urls)),
