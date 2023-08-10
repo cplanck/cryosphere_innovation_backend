@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'general',
     'django_filters',
     'real_time_data',
+    'stats',
     'documentation',
     'storages',
     'algoliasearch_django',

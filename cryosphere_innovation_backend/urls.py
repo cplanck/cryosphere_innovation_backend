@@ -18,6 +18,7 @@ urlpatterns = [
     path('data/', include('data.urls')),
     path('users/', include('user_profiles.urls')),
     path('general/', include('general.urls')),
+    path('stats/', include('stats.urls')),
     path('real-time-data/', include('real_time_data.urls')),
     path(r'rest-auth/', include('dj_rest_auth.urls')),
 ]
