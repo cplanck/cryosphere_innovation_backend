@@ -48,6 +48,7 @@ class BaseInstrument(models.Model):
         User, on_delete=models.CASCADE, null=True, blank=True)
     avatar = models.ImageField(
         upload_to='instruments/avatars', null=True, blank=True)
+    is_simb3 = models.BooleanField(null=True, blank=True, default=False)
     description = models.TextField(max_length=2000, null=True, blank=True)
     notes = models.TextField(max_length=5000, null=True, blank=True)
     details = models.JSONField(blank=True, null=True)
