@@ -3,6 +3,7 @@ from django.urls import include, path
 from rest_framework import routers
 
 from instruments.endpoints import *
+from instruments.public_endpoints import *
 from instruments.user_endpoints import *
 
 router = routers.DefaultRouter()
@@ -15,6 +16,13 @@ router.register('deployments', InternalDeploymentEndpoint,
 
 router.register('deployment/data', InternalDataEndpoint,
                 basename='deployment_data')
+
+### public endpoints 
+
+router.register('public/deployment/data', PublicDataEndpoint, basename='public_data_endpoint')
+
+########################################################
+
 
 ### endpoints for user defined instruments/deployments ###
 router.register('user/sensors', UserInstrumentSensorPackageEndpoint,

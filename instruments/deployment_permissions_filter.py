@@ -16,6 +16,4 @@ def deployment_permissions_filter(self, queryset):
         )
     else:
         deployments = deployment_objects.filter(private=False)
-
-        print(deployments)
     return deployments
