@@ -139,11 +139,12 @@ class DeploymentDataEndpoint(viewsets.ViewSet):
 
     """
     Main deployment data CRUD endpoint.
-    Read/writes/deletes data from the MongoDB collection specified by the data_uuid PK (required) in the URL
+    Read/writes/deletes data from the MongoDB collection specified by the data_uuid PK (required) in the URL.
+    APIKeyAuthentication added 12 August for Lambda function 
     
     Updated 11 August 2023
     """
-    authentication_classes = [CookieTokenAuthentication]
+    authentication_classes = [CookieTokenAuthentication, APIKeyAuthentication]
     permission_classes = [CheckDeploymentReadWritePermissions]
     http_method_names = ['get', 'patch', 'delete']
 
