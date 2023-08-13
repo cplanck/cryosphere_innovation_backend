@@ -2,6 +2,14 @@ from django.db.models import Q
 
 
 def deployment_permissions_filter(self, queryset):
+
+    """
+    Filters a queryset according to the permission rules laid out 
+    in permissions.py. Returns a filtered queryset for use in list()
+    methods.
+    
+    Updated 11 August 2023
+    """
     deployment_objects = queryset
     if not self.request.user.is_authenticated:
         deployments = deployment_objects.filter(private=False)

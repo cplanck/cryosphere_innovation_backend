@@ -9,13 +9,18 @@ load_dotenv()
 
 
 class CookieTokenAuthentication(BaseAuthentication):
+
+    """
+    Authenticate a user using http cookies recieved from the browser. 
+    The cookie access_token is required for authentication. 
+
+    Written 12 July 2023
+    """
     def authenticate(self, request):
         access_token = self.get_token_from_cookie(request)
 
         if not access_token:
-
             return None
-
         try:
             payload = jwt.decode(
                 access_token, settings.SECRET_KEY, algorithms=['HS256'])

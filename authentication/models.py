@@ -12,7 +12,7 @@ class APIKey(models.Model):
 
     user = models.ForeignKey(
         User, null=True, blank=True, on_delete=models.CASCADE)
-    permissions = models.JSONField(blank=True, null=True)
+    read_only = models.BooleanField(default=True, blank=True, null=True)
     key = models.CharField(max_length=64, unique=True, default=generate_key)
     active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)

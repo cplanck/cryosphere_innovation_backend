@@ -27,6 +27,8 @@ class InstrumentSensorPackage(models.Model):
     class Meta:
         verbose_name = 'Instrument Sensor Package'
 
+def generate_instrument_avatar_upload_path(instance, filename):
+    return f'instruments/avatars/{instance.id}/{filename}'
 
 class BaseInstrument(models.Model):
 
@@ -35,19 +37,18 @@ class BaseInstrument(models.Model):
     provides the standard attributes used in subsequent classes. 
     """
 
-    def get_image_upload_path(instance):
-        instance_id = str(instance.pk)
-        upload_path = f'users/instruments/avatars/{instance_id}'
-        return upload_path
+    def get_image_upload_path(instance, filename):
+        """This is unused but breaks migrations if deleted"""
+        pass 
 
     name = models.CharField(max_length=200, null=True)
     serial_number = models.CharField(max_length=100, null=True)
     sensor_package = models.ForeignKey(
-        InstrumentSensorPackage, on_delete=models.CASCADE, blank=True, null=True)
+        InstrumentSensorPackage, on_delete=models.SET_NULL, blank=True, null=True)
     owner = models.ForeignKey(
         User, on_delete=models.CASCADE, null=True, blank=True)
     avatar = models.ImageField(
-        upload_to='instruments/avatars', null=True, blank=True)
+        upload_to=generate_instrument_avatar_upload_path, null=True, blank=True)
     is_simb3 = models.BooleanField(null=True, blank=True, default=False)
     description = models.TextField(max_length=2000, null=True, blank=True)
     notes = models.TextField(max_length=5000, null=True, blank=True)
