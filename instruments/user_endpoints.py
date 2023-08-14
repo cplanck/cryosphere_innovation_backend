@@ -10,8 +10,11 @@ class UserInstrumentEndpoint(InstrumentEndpoint):
     Added 4 August 2023
     """
     def get_queryset(self):
-        queryset = Instrument.objects.filter(owner=self.request.user).order_by('-last_modified')
-        return queryset
+        if self.request.user.is_staff:
+            return self.queryset
+        else:
+            queryset = self.queryset.filter(owner=self.request.user).order_by('-last_modified')
+            return queryset
 
 
 class UserDeploymentEndpoint(DeploymentEndpoint):
@@ -20,8 +23,11 @@ class UserDeploymentEndpoint(DeploymentEndpoint):
     Update 12 August 2023
     """
     def get_queryset(self):
-        queryset = Deployment.objects.filter(instrument__owner=self.request.user).order_by('-last_modified')
-        return deployment_permissions_filter(self, queryset)
+        if self.request.user.is_staff:
+            return self.queryset
+        else:
+            queryset = Deployment.objects.filter(instrument__owner=self.request.user).order_by('-last_modified')
+            return deployment_permissions_filter(self, queryset)
 
 class UserInstrumentSensorPackageEndpoint(InstrumentSensorPackageEndpoint):
     """

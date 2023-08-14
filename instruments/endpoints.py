@@ -85,7 +85,7 @@ class DeploymentEndpoint(viewsets.ModelViewSet):
     pagination_class = DeploymentPagination
     lookup_field = 'slug'
     queryset = Deployment.objects.all().order_by('-last_modified')
-    filterset_fields = ['status']
+    filterset_fields = ['status', 'web_page_enabled']
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_serializer_class(self):
@@ -144,7 +144,7 @@ class DeploymentDataEndpoint(viewsets.ViewSet):
     
     Updated 11 August 2023
     """
-    authentication_classes = [CookieTokenAuthentication, APIKeyAuthentication]
+    authentication_classes = [CookieTokenAuthentication]
     permission_classes = [CheckDeploymentReadWritePermissions]
     http_method_names = ['get', 'patch', 'delete']
 

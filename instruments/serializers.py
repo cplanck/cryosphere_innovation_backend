@@ -60,7 +60,7 @@ class DeploymentInstrumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Instrument
         fields = ['name', 'avatar', 'id',
-                  'serial_number', 'instrument_type', 'sensor_package', 'owner', 'is_simb3']
+                  'serial_number', 'instrument_type', 'sensor_package', 'owner', 'is_simb3', 'sensors', 'unique_index']
 
 
 class DeploymentGETSerializer(serializers.ModelSerializer):

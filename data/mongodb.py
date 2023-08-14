@@ -31,7 +31,8 @@ def create_mongodb_collection(collection_name, unique_index):
     """
     if not mongo_collection_exists(collection_name):
         collection = db.create_collection(collection_name)
-        collection.create_index(unique_index, unique=True)
+        if unique_index:
+            collection.create_index(unique_index, unique=True)
 
     else:
         return None
@@ -59,7 +60,7 @@ def post_data_to_mongodb_collection(collection_name, data):
         return 'All documents added to collection' + collection_name
     except BulkWriteError as e:
         print(e)
-        return "Documents with duplicate unique indexes found. " + str(e.details['nInserted']) + ' documents inserted to ' + collection_name
+        return "Documents with duplicate unique indexes found. " + str(e.details[' Inserted']) + ' documents inserted to ' + collection_name
 
 
 def get_data_from_mongodb(collection_name, fields=None):

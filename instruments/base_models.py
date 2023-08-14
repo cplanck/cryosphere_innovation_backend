@@ -45,6 +45,8 @@ class BaseInstrument(models.Model):
     serial_number = models.CharField(max_length=100, null=True)
     sensor_package = models.ForeignKey(
         InstrumentSensorPackage, on_delete=models.SET_NULL, blank=True, null=True)
+    sensors = models.JSONField(default=dict(), blank=True, null=True)
+    unique_index = models.CharField(null=True, blank=True)
     owner = models.ForeignKey(
         User, on_delete=models.CASCADE, null=True, blank=True)
     avatar = models.ImageField(
@@ -88,8 +90,8 @@ class BaseDeployment(models.Model):
     collaborators = models.ManyToManyField(
         User, related_name='collaborators', blank=True)
     searchable = models.BooleanField(blank=True, null=True, default=False)
-    starred = models.BooleanField(default=False, null=True, blank=True)
-    starred_date = models.DateTimeField(null=True, blank=True)
+    web_page_enabled = models.BooleanField(default=False, null=True, blank=True)
+    unique_index = models.CharField(null=True, blank=True)
     date_added = models.DateTimeField(auto_now_add=True, null=True)
     last_modified = models.DateTimeField(auto_now=True, null=True)
 
