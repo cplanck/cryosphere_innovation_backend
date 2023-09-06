@@ -24,6 +24,12 @@ class DocumentEndpoint(viewsets.ModelViewSet):
     serializer_class = DocumentDetailSerializer
     lookup_field = 'slug'
 
+    def retrieve(self, request, *args, **kwargs):
+        print('INSIDE RETRIEVE')
+        print(kwargs)
+        print(self.request)
+        return super().retrieve(request, *args, **kwargs)
+
     def get_serializer_class(self):
         if self.action == 'list':
             return DocumentSerializer

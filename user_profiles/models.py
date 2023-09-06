@@ -5,6 +5,9 @@ from django.db import models
 from django.db.models import ImageField
 from instruments.models import Deployment
 
+class PinnedDeployment(models.Model):
+    deployment = Deployment
+    date_pinned = models.DateTimeField(auto_now_add=True, null=True)
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -20,3 +23,5 @@ class UserProfile(models.Model):
     has_made_instrument = models.BooleanField(null=True, blank=True)
     dashboard_deployments = models.ManyToManyField(
         Deployment, blank=True)
+    dashboard_deployment_order = models.JSONField(null=True, blank=True)
+    # pinned_deployments = models.ManyToManyField(PinnedDeployment, blank=True)

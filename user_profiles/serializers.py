@@ -20,8 +20,8 @@ class DashboarDeploymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Deployment
         fields = ['name', 'id', 'status',
-                  'deployment_start_date', 'deployment_end_date', 'instrument', 'data_uuid', 'location', 'path', 'slug']
-
+                  'deployment_start_date', 'deployment_end_date', 'instrument', 'data_uuid', 'location', 'path', 'slug', 'private']
+        
 
 class UserProfileSerializer(serializers.ModelSerializer):
     dashboard_deployments = DashboarDeploymentSerializer(
@@ -30,7 +30,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = ['user', 'full_name', 'social_login',
-                  'has_social_avatar', 'dashboard_deployments', 'id', 'beta_tester']
+                  'has_social_avatar', 'dashboard_deployments','dashboard_deployment_order', 'id', 'beta_tester']
 
 
 class UserSerializer(serializers.ModelSerializer):

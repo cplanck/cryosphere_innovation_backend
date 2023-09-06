@@ -158,6 +158,13 @@ class DashboardDeployments(viewsets.ModelViewSet):
         dashboard_deployments = deployment_permissions_filter(self,
                                                               user_profile.dashboard_deployments.all())
         ordered_set = dashboard_deployments.order_by('name').order_by('status')
+
+        if user_profile.dashboard_deployment_order:
+            # if the user has ordered their dashboard, return the list in that order. 
+            try:
+                ordered_set = sorted(dashboard_deployments, key=lambda obj: user_profile.dashboard_deployment_order.index(obj.id))
+            except Exception as e:
+                pass
         serializer = DashboarDeploymentSerializer(
             ordered_set, many=True)
         return Response(serializer.data)
