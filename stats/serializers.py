@@ -32,7 +32,10 @@ class DeploymentDownloadSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_avatar(self, obj):
-        return UserProfileSerializer().get_avatar(obj.user.userprofile)
+        try:
+            return UserProfileSerializer().get_avatar(obj.user.userprofile)
+        except:
+            return  f'https://api.dicebear.com/6.x/identicon/png?scale=50&seed=Snickers'
     
 class DeploymentDownloadPOSTSerializer(serializers.ModelSerializer):
     class Meta:
