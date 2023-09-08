@@ -17,11 +17,14 @@ class DeploymentDownloadEndpoint(viewsets.ModelViewSet):
     authentication_classes = [CookieTokenAuthentication]
     queryset = DeploymentDownload.objects.all().order_by('date_added')
     serializer_class = DeploymentDownloadSerializer
-    lookup_field = 'deployment'
-    filterset_fields = ['deployment']
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
             return DeploymentDownloadSerializer
         else:
             return DeploymentDownloadPOSTSerializer
+        
+    def get_queryset(self):
+        deployment = self.request.GET.get('deployment')
+        deployment_downloads = self.queryset.filter(deployment=deployment).order_by('user').distinct('user')
+        return deployment_downloads
