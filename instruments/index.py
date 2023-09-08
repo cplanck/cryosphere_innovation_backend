@@ -28,6 +28,13 @@ class DeploymentModelIndex(AlgoliaIndex):
         queryset = Deployment.objects.exclude(private=True).exclude(searchable=False)
         return queryset
 
+@register(Document)
+class DocumentModelIndex(AlgoliaIndex):
 
-algoliasearch.register(Instrument)
-algoliasearch.register(Document)
+    """
+    Run python3 manage.py algolia_reindex when you make changes to this file
+    """
+
+    def get_queryset(self):
+        queryset = Document.objects.filter(status='Published')
+        return queryset
