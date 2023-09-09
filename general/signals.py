@@ -26,14 +26,19 @@ def send_client_contact_us_form_email(instance):
     html_message = render_to_string(
         'general/contact_us_form_email.html', {'instance': instance})
     plain_message = strip_tags(html_message)
-    send_mail(
-        subject="We received your submission 🎉",
-        message=plain_message,
-        from_email='support@cryosphereinnovation.com',
-        recipient_list=[instance.form_results['email']],
-        html_message=html_message,
-        fail_silently=False,
-    )
+    try:
+        if instance.form_results['email']:
+            # Contact Us submissions will always have email, but Feedback form submissions won't
+            send_mail(
+                subject="We received your submission 🎉",
+                message=plain_message,
+                from_email='support@cryosphereinnovation.com',
+                recipient_list=[instance.form_results['email']],
+                html_message=html_message,
+                fail_silently=False,
+            )
+    except:
+        pass
 
 
 def send_admin_contact_us_form_email(instance):
