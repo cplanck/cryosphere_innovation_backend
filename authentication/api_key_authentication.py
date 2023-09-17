@@ -21,23 +21,24 @@ class APIKeyAuthentication(BaseAuthentication):
     def authenticate(self, request):
         authorization_header = request.META.get('HTTP_AUTHENTICATION') or request.META.get('HTTP_AUTHORIZATION')
 
-        if not authorization_header.startswith('Bearer '):
-            raise AuthenticationFailed("Invalid token format.")
-                
-        api_key = authorization_header[7:]
+        try:
+            if not authorization_header.startswith('Bearer '):
+                raise AuthenticationFailed("Invalid token format.")
+                    
+            api_key = authorization_header[7:]
 
 
-        if not api_key:
-            raise AuthenticationFailed(f'Missing API key.')
+            if not api_key:
+                raise AuthenticationFailed(f'Missing API key.')
+            
+            api_key_obj = APIKey.objects.get(key=api_key)
+            if request.method not in permissions.SAFE_METHODS and api_key_obj.read_only:
+                    raise AuthenticationFailed(f'Your read-only API key does not give you write access to this data.')
+            else:
+                user = api_key_obj.user
+                return (user, None)
         
-        api_key_obj = APIKey.objects.get(key=api_key)
-        if request.method not in permissions.SAFE_METHODS and api_key_obj.read_only:
-                raise AuthenticationFailed(f'Your read-only API key does not give you write access to this data.')
-        else:
-            user = api_key_obj.user
-            return (user, None)
-        
-        # except Exception as e:
-        #     print(e)
-        #     raise AuthenticationFailed(f'There was a problem authenticating your your request. It is possible that you have a badly formatted API key.')
+        except Exception as e:
+            print(e)
+            raise AuthenticationFailed(f'There was a problem authenticating your your request. It is possible that you have a badly formatted or missing API key.')
        
