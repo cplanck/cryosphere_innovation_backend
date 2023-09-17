@@ -28,7 +28,7 @@ class SendUserEmail(APIView):
             fail_silently=False,
         )
 
-        return Response('I worked!')
+        return Response('It worked!')
 
 
 class UpdatesAndChangesEndpoint(viewsets.ModelViewSet):

@@ -102,7 +102,7 @@ class GoogleOneTap(APIView):
 
                 user_profile = UserProfile.objects.get(user=user)
 
-                dice_bear_avatar = ['Maggie', 'Mittens', 'Mia',
+                dice_bear_avatar = ['Maggie', 'Mittens', '  ',
                                  'Pumpkin', 'Peanut', 'Socks', 'Jasmine', 'Snickers']
                 user_profile.robot = random.choice(dice_bear_avatar)
                 user_profile.social_login = True
@@ -174,7 +174,6 @@ class StandardLogin(APIView):
 class RefreshAccessToken(APIView):
 
     def post(self, request):
-        print('THIS RAN')
         refresh_token = request.COOKIES.get('refresh_token')
         if refresh_token:
             try:
@@ -259,12 +258,12 @@ class GenerateAPIKey(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = APIKeySerializer
     queryset = APIKey.objects.all()
-    lookup_field = 'user_id'
+    lookup_field = 'key'
 
     def create(self, request, *args, **kwargs):
 
         serializer = self.get_serializer(
-            data={'user': request.user.pk, 'permissions': [{"deployments": []}]})
+            data={'user': request.user.pk})
 
         if serializer.is_valid():
             print(serializer.errors)
@@ -272,3 +271,8 @@ class GenerateAPIKey(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response('unsuccessful', status=status.HTTP_400_BAD_REQUEST)
+        
+    def get_queryset(self):
+        user = self.request.user
+        api_keys = APIKey.objects.filter(user=user).order_by('read_only')
+        return api_keys

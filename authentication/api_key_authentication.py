@@ -19,7 +19,14 @@ class APIKeyAuthentication(BaseAuthentication):
     """
 
     def authenticate(self, request):
-        api_key = request.META.get('HTTP_AUTHENTICATION') or request.META.get('AUTHENTICATION')
+        authorization_header = request.META.get('HTTP_AUTHENTICATION') or request.META.get('HTTP_AUTHORIZATION')
+
+        if not authorization_header.startswith('Bearer '):
+            raise AuthenticationFailed("Invalid token format.")
+                
+        api_key = authorization_header[7:]
+
+
         if not api_key:
             raise AuthenticationFailed(f'Missing API key.')
         
