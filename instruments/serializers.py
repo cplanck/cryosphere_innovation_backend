@@ -80,6 +80,11 @@ class DeploymentGETSerializer(serializers.ModelSerializer):
         model = Deployment
         fields = '__all__'
 
+class PublicDeploymentGETSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Deployment
+        fields = ['name', 'status', 'location', 'slug', 'data_uuid', 'deployment_description', 'deployment_notes', 'deployment_start_date', 'deployment_end_date', 'details']
 
 class DeploymentSerializer(serializers.ModelSerializer):
     """

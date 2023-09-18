@@ -1,5 +1,6 @@
 from authentication.api_key_authentication import APIKeyAuthentication
 from .endpoints import DeploymentDataEndpoint, DeploymentEndpoint
+from .serializers import PublicDeploymentGETSerializer, DeploymentGETSerializer, DeploymentSerializer
 
 class PublicDataEndpoint(DeploymentDataEndpoint):
 
@@ -16,6 +17,16 @@ class PublicDeploymentEndpoint(DeploymentEndpoint):
     thing as DeploymentEndpoint, but uses an API key for authentication.
     """
     authentication_classes = [APIKeyAuthentication]
-    http_method_names = ['get'] # all CRUD needs to happen on the frontend, even if owner
+    http_method_names = ['get'] # currently all CRUD needs to happen on the frontend, even if owner
+
+    def get_serializer_class(self):
+        
+        if self.request.method == 'GET':
+            if self.request.user.is_staff:
+                return DeploymentGETSerializer
+            else:
+                return PublicDeploymentGETSerializer
+        else:
+            return DeploymentSerializer
 
 
