@@ -81,6 +81,14 @@ CORS_ALLOWED_ORIGINS = ['https://cryospherex.com', 'https://www.cryospherex.com'
 
 CORS_ALLOW_HEADERS = list(default_headers) + ['Set-Cookie', 'Authorization']
 
+# Added pre-deployment
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True 
+SECURE_HSTS_SECONDS = 60 
+SECURE_SSL_REDIRECT = True
+SECURE_HSTS_PRELOAD = True
+
 ROOT_URLCONF = 'cryosphere_innovation_backend.urls'
 
 TEMPLATES = [
