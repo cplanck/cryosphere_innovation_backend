@@ -77,7 +77,7 @@ CORS_EXPOSE_HEADERS = ['Set-Cookie']
 
 CORS_ALLOW_CREDENTIALS = True
 
-CORS_ALLOWED_ORIGINS = ['https://cryospherexs.com']
+CORS_ALLOWED_ORIGINS = ['https://cryospherex.com']
 
 CORS_ALLOW_HEADERS = list(default_headers) + ['Set-Cookie', 'Authorization']
 
