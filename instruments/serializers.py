@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from user_profiles.serializers import UserSerializer
+from user_profiles.serializers import UserSerializer, CollaboratorSerializer
 from django.contrib.auth.models import User
 
 from .models import *
@@ -68,7 +68,7 @@ class DeploymentGETSerializer(serializers.ModelSerializer):
     Returns a nested representation of instrument on GET requests
     """
     instrument = DeploymentInstrumentSerializer()
-    collaborators = UserSerializer(many=True)
+    collaborators = CollaboratorSerializer(many=True)
     real_time_data = serializers.SerializerMethodField(method_name='get_real_time_data')
 
     def get_real_time_data(self, deployment):

@@ -54,6 +54,18 @@ class UserSerializer(serializers.ModelSerializer):
     def get_beta_tester(self, obj):
         beta_tester = obj.userprofile.beta_tester
         return beta_tester
+    
+class CollaboratorSerializer(UserSerializer):
+
+    """
+    Subclass of UserSerializer for sending collaborator profile 
+    information
+    """
+
+    class Meta:
+        model = User
+        fields = ['id', 'first_name','last_name', 'email',
+                  'avatar', 'email']
 
 
 class UserModelSerializer(serializers.ModelSerializer):

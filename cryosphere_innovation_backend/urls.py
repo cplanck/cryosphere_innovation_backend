@@ -4,8 +4,8 @@ from django.http import HttpResponse
 from django.urls import include, path
 
 
-def index(request):
-    return HttpResponse("")
+# def index(request):
+#     return HttpResponse("hello")
 
 
 urlpatterns = [

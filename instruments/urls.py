@@ -1,7 +1,7 @@
 
 from django.urls import include, path
 from rest_framework import routers
-
+from django.http import HttpResponseRedirect
 from instruments.endpoints import *
 from instruments.public_endpoints import *
 from instruments.user_endpoints import *
@@ -10,6 +10,7 @@ router = routers.DefaultRouter()
 
 # Internal endpoints
 # Used the the frontend
+
 router.register('instruments', InstrumentEndpoint,
                 basename='internal_instruments')
 router.register('deployments', DeploymentEndpoint,
@@ -35,6 +36,10 @@ router.register('user/deployment/data', DeploymentDataEndpoint,
 router.register('public/deployments', PublicDeploymentEndpoint, basename='public_deployment_endpoint')
 router.register('public/deployment/data', PublicDataEndpoint, basename='public_data_endpoint')
 
+def api_root_page(request):
+    return HttpResponseRedirect(os.getenv('STANDALONE_FRONTEND_ROOT') + '/docs/rest-api')
+
 urlpatterns = [
+    path('', api_root_page),
     path('', include(router.urls)),
 ]
