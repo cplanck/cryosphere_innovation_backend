@@ -73,22 +73,12 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# CORS_ORIGIN_WHITELIST = [
-#     'http://localhost:3000', 'https://cryosphere-innovation-frontend.vercel.app',
-# ]
-# CORS_ORIGIN_WHITELIST = [
-#     'https://cryosphere-innovation-frontend.vercel.app',
-# ]
-
 CORS_EXPOSE_HEADERS = ['Set-Cookie']
-CORS_ALLOW_ALL_ORIGINS = True
+
 CORS_ALLOW_CREDENTIALS = True
-# CORS_ALLOWED_ORIGINS = [
-#     # 'http://localhost:3000',
-#     # 'http://127.0.0.1:3000',
-#     'https://cryosphere-innovation-frontend.vercel.app',
-# ]
-# making sure CORS_ALLOW_HEADERS  is not "*"
+
+CORS_ALLOWED_ORIGINS = ['https://cryospherex.com']
+
 CORS_ALLOW_HEADERS = list(default_headers) + ['Set-Cookie', 'Authorization']
 
 ROOT_URLCONF = 'cryosphere_innovation_backend.urls'
@@ -172,7 +162,6 @@ REST_AUTH = {
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=30),
-    # 'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
     'AUTH_HEADER_TYPES': ('Bearer',),
     'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
 }
@@ -199,9 +188,6 @@ GSUITE_CREDENTIALS_FILE = os.path.join(
 SITE_ID = 1
 
 STANDALONE_FRONTEND_ROOT = os.getenv('STANDALONE_FRONTEND_ROOT')
-
-# Internationalization
-# https://docs.djangoproject.com/en/4.0/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
