@@ -3,6 +3,7 @@
 from .deployment_permissions_filter import deployment_permissions_filter
 from .models import Deployment, Instrument
 from .endpoints import DeploymentEndpoint, InstrumentEndpoint, InstrumentSensorPackageEndpoint
+from django.db.models import Q
 
 class UserInstrumentEndpoint(InstrumentEndpoint):
     """
@@ -27,6 +28,7 @@ class UserDeploymentEndpoint(DeploymentEndpoint):
             return self.queryset
         else:
             queryset = Deployment.objects.filter(instrument__owner=self.request.user).order_by('-last_modified')
+            # queryset = self.queryset.filter(Q(instrument__owner=self.request.user) | Q(collaborators__in=[self.request.user])).order_by('-last_modified')
             return deployment_permissions_filter(self, queryset)
 
 class UserInstrumentSensorPackageEndpoint(InstrumentSensorPackageEndpoint):

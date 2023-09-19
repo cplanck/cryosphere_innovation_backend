@@ -15,7 +15,7 @@ class DeploymentModelIndex(AlgoliaIndex):
     """
 
     fields = ('id', 'name', 'instrument', 'status', 'details',
-              'deployment_start_date', 'deployment_end_date', 'location', 'algolia_index', 'path', 'data_uuid', 'slug', 'searchable')
+              'deployment_start_date', 'deployment_end_date', 'location', 'algolia_index', 'path', 'data_uuid', 'slug', 'searchable', 'private')
 
     settings = {
         'searchableAttributes': ['algolia_index', 'status', 'deployment_start_date', 'deployment_end_date', 'location', 'details', 'path'],
