@@ -30,7 +30,7 @@ DEBUG = os.getenv('SECRET_KEY')
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-ALLOWED_HOSTS = ['localhost', 'api.cryospherex.com']
+ALLOWED_HOSTS = ['localhost', 'api.cryospherex.com', 'api.cryosphereinnovation.com']
 
 WEBSITE_ROOT = os.getenv('WEBSITE_ROOT')
 
@@ -170,7 +170,6 @@ REST_AUTH = {
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
-    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
     'AUTH_HEADER_TYPES': ('Bearer',),
     'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
