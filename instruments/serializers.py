@@ -10,7 +10,7 @@ class SensorPackageInstrumentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = InstrumentSensorPackage
-        fields = ['id', 'name']
+        fields = ['id', 'template_name']
 
 class DeploymentInstrumentOwnerSerializer(serializers.ModelSerializer):
     avatar = serializers.SerializerMethodField()

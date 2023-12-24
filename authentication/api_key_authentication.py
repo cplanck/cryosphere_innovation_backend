@@ -13,13 +13,15 @@ load_dotenv()
 class APIKeyAuthentication(BaseAuthentication):
 
     """
-    API key authentication class. Simply checks if an 
-    API key was passed in the header, identifying the user
+    API key authentication class. Simply checks if an API key was passed in the header and identifies the user
     if it is and rejecting the request if it isn't. 
+
+    Method also distinguishes between read-only and write-access keys. If a read-only key is passed and the method
+    is not in SAFE_METHODS (e.g., GET, HEAD) an authentication error will be raised. 
     """
 
     def authenticate(self, request):
-        authorization_header = request.META.get('HTTP_AUTHENTICATION') or request.META.get('HTTP_AUTHORIZATION')
+        authorization_header = request.META.get('HTTP_AUTHENTICATION') or request.META.get('HTTP_AUTHORIZATION') or request.META.get('Authorization')
 
         try:
             if not authorization_header.startswith('Bearer '):

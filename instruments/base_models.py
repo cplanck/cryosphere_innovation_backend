@@ -9,20 +9,26 @@ from django.db.models import ImageField
 
 class InstrumentSensorPackage(models.Model):
     """
-    Instrument data model class. Used to define an instruments sensor package so that plots can
+    Instrument sensor package class. 
+    Used to define an instruments sensor package so that plots can
     be created for the frontend.
     """
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, blank=True, null=True)
-    name = models.CharField(max_length=100, blank=True, null=True)
     description = models.TextField(max_length=2000, null=True, blank=True)
     fields = models.JSONField(
         default=dict(), blank=True, null=True)
+    template = models.BooleanField(blank=True, null=True)
+    template_name = models.TextField(max_length=100, null=True, blank=True)
+    time_stamp_database_field = models.TextField(max_length=200, null=True, blank=True)
+    time_stamp_format = models.TextField(max_length=200, null=True, blank=True)
+    latitude_database_field = models.TextField(max_length=200, null=True, blank=True)
+    longitude_database_field = models.TextField(max_length=200, null=True, blank=True)
     date_added = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     last_modified = models.DateTimeField(auto_now=True, null=True, blank=True)
 
     def __str__(self):
-        return self.name
+        return self.template_name
 
     class Meta:
         verbose_name = 'Instrument Sensor Package'

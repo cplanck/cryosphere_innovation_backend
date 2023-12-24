@@ -11,6 +11,7 @@ from rest_framework.permissions import (AllowAny, BasePermission, IsAdminUser,
                                         IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
+from django.http import JsonResponse
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
@@ -23,6 +24,8 @@ from .serializers import (DeploymentGETSerializer, DeploymentSerializer,
                           InstrumentSensorPackageSerializer,
                           InstrumentSerializer)
 from .permissions import CheckDeploymentReadWritePermissions
+from openai import OpenAI
+
 
 
 
@@ -187,4 +190,32 @@ class InstrumentSensorPackageEndpoint(viewsets.ModelViewSet):
      
     authentication_classes = [CookieTokenAuthentication]
     serializer_class = InstrumentSensorPackageSerializer
-    queryset = InstrumentSensorPackage.objects.all().order_by('-last_modified')
+
+    def get_queryset(self):
+        queryset = InstrumentSensorPackage.objects.filter(user=self.request.user)
+        return queryset
+
+
+class PredictSensorFields(viewsets.ViewSet):
+    """
+    Endpoint for returning instrument sensor fields using the OpenAI API. 
+    Accepts POST requests with the headers stripped from user uploaded 
+    sample datasheet.
+
+    Updaated 22 December 2023
+    """
+    authentication_classes = [CookieTokenAuthentication]
+    http_method_names = ['post']
+
+    def create(self, request):
+        client = OpenAI()
+        completion = client.chat.completions.create(
+            model="gpt-4",
+            messages=[
+            {"role": "system", "content": "You will be provided with a list of headers and your goal is to return a list of objects, where each object is the form {fieldName: value, databaseName: value, unit: value, decimal: value}.  If the header you receive is capitalized or has spaces, you should use it as the fieldName. You should then decapitalize it and replace any spaces with underscores. There should be no special characters in the databaseName, but the fieldName should look nice and be capitalized. You should also estimate a value for the unit. Examples are 'C' for temperatures, 'mBar' for pressures, and 'deg' for latitudes or longitudes. fieldName acronyms should be capitalized. Any number should use the # for the unit. Temperatures should default to deg C. Times should default to seconds or Unix. The output must always be a list of dictionaries/objects. Never truncate the output or print anything else."},
+            {"role": "user", "content": str(request.data)}
+            ]
+        )
+        print(completion.choices[0].message.content)
+        return JsonResponse({'prediction': completion.choices[0].message.content}, status=status.HTTP_200_OK)
+

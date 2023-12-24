@@ -71,35 +71,35 @@ class TestPublicDeploymentDataPermissions(APITestCase):
         # public user GET request to public deployment. Should pass. 
         id=self.public_deployment.data_uuid
         url = reverse('public_data_endpoint-detail', args=[id])
-        headers = {'AUTHENTICATION': self.public_user_api_key.key}
+        headers = {'Authorization': 'Bearer ' + self.public_user_api_key.key}
         response = self.client.get(url, format='json', **headers)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # owner user GET request to public deployment. Should pass.
         id=self.public_deployment.data_uuid
         url = reverse('public_data_endpoint-detail', args=[id])
-        headers = {'AUTHENTICATION': self.owner_api_key.key}
+        headers = {'Authorization': 'Bearer ' + self.owner_api_key.key}
         response = self.client.get(url, format='json', **headers)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # collaborator user GET request to public deployment. Should pass
         id=self.public_deployment.data_uuid
         url = reverse('public_data_endpoint-detail', args=[id])
-        headers = {'AUTHENTICATION': self.collaborator_api_key.key}
+        headers = {'Authorization': 'Bearer ' + self.collaborator_api_key.key}
         response = self.client.get(url, format='json', **headers)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # owner PATCH request. Should fail because API keys are read-only by default
         id=self.public_deployment.data_uuid
         url = reverse('public_data_endpoint-detail', args=[id])
-        headers = {'AUTHENTICATION': self.owner_api_key.key}
+        headers = {'Authorization': 'Bearer ' + self.owner_api_key.key}
         response = self.client.patch(url, format='json', **headers, data={'hello':'world'})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         # collaborator PATCH request. Should fail because API keys are read-only by default
         id=self.public_deployment.data_uuid
         url = reverse('public_data_endpoint-detail', args=[id])
-        headers = {'AUTHENTICATION': self.collaborator_api_key.key}
+        headers = {'Authorization': 'Bearer ' + self.collaborator_api_key.key}
         response = self.client.patch(url, format='json', **headers, data={'hello':'world'})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -108,7 +108,7 @@ class TestPublicDeploymentDataPermissions(APITestCase):
         self.owner_api_key.save()
         id=self.public_deployment.data_uuid
         url = reverse('public_data_endpoint-detail', args=[id])
-        headers = {'AUTHENTICATION': self.owner_api_key.key}
+        headers = {'Authorization': 'Bearer ' + self.owner_api_key.key}
         response = self.client.patch(url, format='json', **headers, data=[{'hello':'world', 'time_stamp': 1}])
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -117,7 +117,7 @@ class TestPublicDeploymentDataPermissions(APITestCase):
         self.collaborator_api_key.save()
         id=self.public_deployment.data_uuid
         url = reverse('public_data_endpoint-detail', args=[id])
-        headers = {'AUTHENTICATION': self.collaborator_api_key.key}
+        headers = {'Authorization': 'Bearer ' + self.collaborator_api_key.key}
         response = self.client.patch(url, format='json', **headers, data=[{'hello':'world', 'time_stamp': 2}])
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -126,14 +126,14 @@ class TestPublicDeploymentDataPermissions(APITestCase):
         self.public_user_api_key.save()
         id=self.public_deployment.data_uuid
         url = reverse('public_data_endpoint-detail', args=[id])
-        headers = {'AUTHENTICATION': self.public_user_api_key.key}
+        headers = {'Authorization': 'Bearer ' + self.public_user_api_key.key}
         response = self.client.patch(url, format='json', **headers, data=[{'hello':'world', 'time_stamp': 3}])
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         # also make sure public cannot delete
         id=self.public_deployment.data_uuid
         url = reverse('public_data_endpoint-detail', args=[id])
-        headers = {'AUTHENTICATION': self.public_user_api_key.key}
+        headers = {'Authorization': 'Bearer ' + self.public_user_api_key.key}
         response = self.client.delete(url, format='json', **headers, data=[{'hello':'world', 'time_stamp': 3}])
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -141,14 +141,14 @@ class TestPublicDeploymentDataPermissions(APITestCase):
         # PUT
         id=self.public_deployment.data_uuid
         url = reverse('public_data_endpoint-detail', args=[id])
-        headers = {'AUTHENTICATION': self.owner_api_key.key}
+        headers = {'Authorization': 'Bearer ' + self.owner_api_key.key}
         response = self.client.put(url, format='json', **headers, data=[{'hello':'world', 'time_stamp': 1}])
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
         # POST
         id=self.public_deployment.data_uuid
         url = reverse('public_data_endpoint-list')
-        headers = {'AUTHENTICATION': self.owner_api_key.key}
+        headers = {'Authorization': 'Bearer ' + self.owner_api_key.key}
         response = self.client.post(url, format='json', **headers, data=[{'hello':'world', 'time_stamp': 1}])
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
@@ -218,21 +218,21 @@ class TestPrivateDeploymentDataPermissions(APITestCase):
         # public user GET request to private deployment. Should FAIL. 
         id=self.private_deployment.data_uuid
         url = reverse('public_data_endpoint-detail', args=[id])
-        headers = {'AUTHENTICATION': self.public_user_api_key.key}
+        headers = {'Authorization': 'Bearer ' + self.public_user_api_key.key}
         response = self.client.get(url, format='json', **headers)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         # owner user GET request to private deployment. Should pass.
         id=self.private_deployment.data_uuid
         url = reverse('public_data_endpoint-detail', args=[id])
-        headers = {'AUTHENTICATION': self.owner_api_key.key}
+        headers = {'Authorization': 'Bearer ' + self.owner_api_key.key}
         response = self.client.get(url, format='json', **headers)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # collaborator user GET request to public deployment. Should pass
         id=self.private_deployment.data_uuid
         url = reverse('public_data_endpoint-detail', args=[id])
-        headers = {'AUTHENTICATION': self.collaborator_api_key.key}
+        headers = {'Authorization': 'Bearer ' + self.collaborator_api_key.key}
         response = self.client.get(url, format='json', **headers)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -241,7 +241,7 @@ class TestPrivateDeploymentDataPermissions(APITestCase):
         self.owner_api_key.save()
         id=self.private_deployment.data_uuid
         url = reverse('public_data_endpoint-detail', args=[id])
-        headers = {'AUTHENTICATION': self.owner_api_key.key}
+        headers = {'Authorization': 'Bearer ' + self.owner_api_key.key}
         response = self.client.patch(url, format='json', **headers, data=[{'hello':'world', 'time_stamp': 1}])
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -250,7 +250,7 @@ class TestPrivateDeploymentDataPermissions(APITestCase):
         self.collaborator_api_key.save()
         id=self.private_deployment.data_uuid
         url = reverse('public_data_endpoint-detail', args=[id])
-        headers = {'AUTHENTICATION': self.collaborator_api_key.key}
+        headers = {'Authorization': 'Bearer ' + self.collaborator_api_key.key}
         response = self.client.patch(url, format='json', **headers, data=[{'hello':'world', 'time_stamp': 2}])
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
     

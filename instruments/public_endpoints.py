@@ -14,7 +14,7 @@ class PublicDeploymentEndpoint(DeploymentEndpoint):
 
     """
     Publically exposed enpoint for CRUD on deployment model. Same
-    thing as DeploymentEndpoint, but uses an API key for authentication.
+    thing as DeploymentEndpoint, but uses an API key for authentication instead of JWT.
     """
     authentication_classes = [APIKeyAuthentication]
     http_method_names = ['get'] # currently all CRUD needs to happen on the frontend, even if owner

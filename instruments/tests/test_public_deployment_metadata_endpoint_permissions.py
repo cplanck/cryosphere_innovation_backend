@@ -67,7 +67,7 @@ class TestPublicDeploymentMetadataPermissions(APITestCase):
         # public user GET request to public deployment. Should pass. 
         id=self.public_deployment.slug
         url = reverse('public_deployment_endpoint-detail', args=[id])
-        headers = {'AUTHENTICATION': self.public_user_api_key.key}
+        headers = {'HTTP_AUTHENTICATION': 'Bearer ' + self.public_user_api_key.key}
         response = self.client.get(url, format='json', **headers)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -77,7 +77,7 @@ class TestPublicDeploymentMetadataPermissions(APITestCase):
         self.owner_api_key.save()
         id=self.public_deployment.slug
         url = reverse('public_deployment_endpoint-detail', args=[id])
-        headers = {'AUTHENTICATION': self.owner_api_key.key}
+        headers = {'HTTP_AUTHENTICATION': 'Bearer ' + self.owner_api_key.key}
         response = self.client.patch(url, format='json', **headers)
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
@@ -86,7 +86,7 @@ class TestPublicDeploymentMetadataPermissions(APITestCase):
         self.owner_api_key.save()
         id=self.public_deployment.slug
         url = reverse('public_deployment_endpoint-list')
-        headers = {'AUTHENTICATION': self.owner_api_key.key}
+        headers = {'HTTP_AUTHENTICATION': 'Bearer ' + self.owner_api_key.key}
         response = self.client.post(url, format='json', **headers)
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
@@ -95,7 +95,7 @@ class TestPublicDeploymentMetadataPermissions(APITestCase):
         self.owner_api_key.save()
         id=self.public_deployment.slug
         url = reverse('public_deployment_endpoint-detail', args=[id])
-        headers = {'AUTHENTICATION': self.owner_api_key.key}
+        headers = {'HTTP_AUTHENTICATION': 'Bearer ' + self.owner_api_key.key}
         response = self.client.delete(url, format='json', **headers)
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
@@ -161,21 +161,21 @@ class TestPrivateDeploymentMetadataPermissions(APITestCase):
         # public user GET request to private deployment. Should fail. 
         id=self.private_deployment.slug
         url = reverse('public_deployment_endpoint-detail', args=[id])
-        headers = {'AUTHENTICATION': self.public_user_api_key.key}
+        headers = {'Authorization': 'Bearer ' + self.public_user_api_key.key}
         response = self.client.get(url, format='json', **headers)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND) # view responds to an empty queryset with a 404
 
         # owner user GET request to private deployment. Should pass. 
         id=self.private_deployment.slug
         url = reverse('public_deployment_endpoint-detail', args=[id])
-        headers = {'AUTHENTICATION': self.owner_api_key.key}
+        headers = {'Authorization': 'Bearer ' + self.owner_api_key.key}
         response = self.client.get(url, format='json', **headers)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # collaborator user GET request to private deployment. Should pass. 
         id=self.private_deployment.slug
         url = reverse('public_deployment_endpoint-detail', args=[id])
-        headers = {'AUTHENTICATION': self.collaborator_api_key.key}
+        headers = {'Authorization': 'Bearer ' + self.collaborator_api_key.key}
         response = self.client.get(url, format='json', **headers)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 

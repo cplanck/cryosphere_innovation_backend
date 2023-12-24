@@ -4,6 +4,6 @@ import requests
 # print(response)
 
 
-url = 'https://api.cryospherex.com/public/deployments/300434066157890'; 
+url = 'http://localhost:8000/public/deployments/300434066157890'; 
 response = requests.get(url, headers={'Authorization':'Bearer QBkOot5g7sxPg98ZVZ2JFXML9L4BByBl'}).json()
 print(response)
