@@ -77,7 +77,7 @@ CORS_EXPOSE_HEADERS = ['Set-Cookie']
 
 CORS_ALLOW_CREDENTIALS = True
 
-CORS_ALLOWED_ORIGINS = ['https://cryospherex.com', 'https://www.cryospherex.com','https://cryosphereinnovation.com', 'https://www.cryosphereinnovation.com', 'http://localhost:3000']
+CORS_ALLOWED_ORIGINS = ['https://cryospherex.com', 'https://www.cryospherex.com','https://cryosphereinnovation.com', 'https://www.cryosphereinnovation.com', 'http://localhost:3000', 'https://cryosphere-innovation-fronten-git-fac879-cryosphere-innovation2.vercel.app/']
 
 CORS_ALLOW_HEADERS = list(default_headers) + ['Set-Cookie', 'Authorization']
 
