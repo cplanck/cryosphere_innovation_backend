@@ -36,6 +36,6 @@ class UserInstrumentSensorPackageEndpoint(InstrumentSensorPackageEndpoint):
     Endpoint for user CRUD on user sensor packages. Subclasses InstrumentSensorPackage.
     Updated 12 August 2023
     """
-    def get_queryset(self):
-        queryset = self.queryset.filter(user=self.request.user)
-        return queryset
+    # def get_queryset(self):
+    #     queryset = self.queryset.filter(user=self.request.user)
+    #     return queryset
