@@ -190,10 +190,12 @@ class InstrumentSensorPackageEndpoint(viewsets.ModelViewSet):
      
     authentication_classes = [CookieTokenAuthentication]
     serializer_class = InstrumentSensorPackageSerializer
+    filterset_fields = ['template', 'user']
+    queryset = InstrumentSensorPackage.objects.all()
 
-    def get_queryset(self):
-        queryset = InstrumentSensorPackage.objects.filter(user=self.request.user)
-        return queryset
+    # def get_queryset(self):
+    #     queryset = InstrumentSensorPackage.objects.filter(user=self.request.user)
+    #     return queryset
 
 
 class PredictSensorFields(viewsets.ViewSet):
@@ -209,13 +211,28 @@ class PredictSensorFields(viewsets.ViewSet):
 
     def create(self, request):
         client = OpenAI()
+
+    #     stream = client.chat.completions.create(
+    #     model="gpt-4",
+    #     messages=[
+    #         {"role": "system", "content": "You will be provided with a list of headers and your goal is to return a list of objects, where each object is the form {fieldName: value, databaseName: value, unit: value, decimal: value}.  If the header you receive is capitalized or has spaces, you should use it as the fieldName. You should then decapitalize it and replace any spaces with underscores. There should be no special characters in the databaseName, but the fieldName should look nice and be capitalized. You should also estimate a value for the unit. Examples are 'C' for temperatures, 'mBar' for pressures, and 'deg' for latitudes or longitudes. fieldName acronyms should be capitalized. Any number should use the # for the unit. Temperatures should default to deg C. Times should default to seconds or Unix. The output must always be a list of dictionaries/objects. Never truncate the output or print anything else."},
+    #         {"role": "user", "content": str(request.data)},
+    #         ],
+    #     stream=True,
+    # )
+    #     for chunk in stream:
+    #         if chunk.choices[0].delta.content is not None:
+    #             print(chunk.choices[0].delta.content, end="")
+            
         completion = client.chat.completions.create(
             model="gpt-4",
             messages=[
-            {"role": "system", "content": "You will be provided with a list of headers and your goal is to return a list of objects, where each object is the form {fieldName: value, databaseName: value, unit: value, decimal: value}.  If the header you receive is capitalized or has spaces, you should use it as the fieldName. You should then decapitalize it and replace any spaces with underscores. There should be no special characters in the databaseName, but the fieldName should look nice and be capitalized. You should also estimate a value for the unit. Examples are 'C' for temperatures, 'mBar' for pressures, and 'deg' for latitudes or longitudes. fieldName acronyms should be capitalized. Any number should use the # for the unit. Temperatures should default to deg C. Times should default to seconds or Unix. The output must always be a list of dictionaries/objects. Never truncate the output or print anything else."},
-            {"role": "user", "content": str(request.data)}
-            ]
+            {"role": "system", "content": "You will be provided a string and your goal is to return an object in the form {fieldName: value, databaseName: value, unit: value, precision: value}.  If the string is capitalized, has spaces, or looks human readable you should use it as the fieldName. You should then modify the value to be machine readable, meaning it doesn’t have any capital letters, special characters, and you should replace any spaces with underscores and use it as a databaseName. You should also estimate a value for the unit based on the fieldName. Examples are 'C' for temperatures, 'mBar' for pressures, and 'deg' for latitudes or longitudes. fieldName acronyms should be capitalized. Any number should use the # for the unit. Temperatures should default to deg C. Times should default to seconds or Unix. The output must always be a single object. Never truncate the output or print anything else. Precision is the number of decimals to keep for each field."},{"role": "system", "content": "You will be provided a string that represents a header and your goal is to return an object in the form {fieldName: value, databaseName: value, unit: value, precision: value}.  If the string is capitalized, has spaces, or looks human readable you should use it as the fieldName. You should then modify the value to be machine readable, meaning it doesn’t have any capital letters, special characters, and you should replace any spaces with underscores and use it as a databaseName. You should also estimate a value for the unit based on the fieldName. Examples are 'C' for temperatures, 'mBar' for pressures, and 'deg' for latitudes or longitudes. fieldName acronyms should be capitalized. Any number should use the # for the unit. Temperatures should default to deg C. Times should default to seconds or Unix. The output must always be a single object. Never truncate the output or print anything else OR ASK ANY CLARIFYING QUESTIONS. Precision is the number of decimals to keep for each field."},
+            {"role": "user", "content": str(request.data)},
+            ],
         )
+
+        print(request.data)
         print(completion.choices[0].message.content)
         return JsonResponse({'prediction': completion.choices[0].message.content}, status=status.HTTP_200_OK)
 

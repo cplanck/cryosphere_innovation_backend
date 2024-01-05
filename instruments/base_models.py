@@ -17,13 +17,13 @@ class InstrumentSensorPackage(models.Model):
         User, on_delete=models.CASCADE, blank=True, null=True)
     description = models.TextField(max_length=2000, null=True, blank=True)
     fields = models.JSONField(
-        default=dict(), blank=True, null=True)
+        default=dict, blank=True, null=True)
     template = models.BooleanField(blank=True, null=True)
     template_name = models.TextField(max_length=100, null=True, blank=True)
-    time_stamp_database_field = models.TextField(max_length=200, null=True, blank=True)
+    time_stamp_field = models.JSONField(default=dict, blank=True, null=True)
+    latitude_field = models.JSONField(default=dict, blank=True, null=True)
+    longitude_field = models.JSONField(default=dict, blank=True, null=True)
     time_stamp_format = models.TextField(max_length=200, null=True, blank=True)
-    latitude_database_field = models.TextField(max_length=200, null=True, blank=True)
-    longitude_database_field = models.TextField(max_length=200, null=True, blank=True)
     date_added = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     last_modified = models.DateTimeField(auto_now=True, null=True, blank=True)
 
