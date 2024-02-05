@@ -4,7 +4,8 @@ from instruments.models import Deployment
 
 class DecodeScript(models.Model):
     name = models.CharField(blank=True, null=True)
-    script = models.TextField(blank=True, null=True)
+    script = models.TextField( blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
     date_added = models.DateTimeField(auto_now_add=True, null=True)
     last_modified = models.DateTimeField(auto_now=True, null=True)
 

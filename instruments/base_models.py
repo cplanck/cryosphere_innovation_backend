@@ -28,7 +28,7 @@ class InstrumentSensorPackage(models.Model):
     last_modified = models.DateTimeField(auto_now=True, null=True, blank=True)
 
     def __str__(self):
-        return self.template_name
+        return self.template_name or 'generic'
 
     class Meta:
         verbose_name = 'Instrument Sensor Package'
@@ -51,7 +51,7 @@ class BaseInstrument(models.Model):
     serial_number = models.CharField(max_length=100, null=True)
     sensor_package = models.ForeignKey(
         InstrumentSensorPackage, on_delete=models.SET_NULL, blank=True, null=True)
-    sensors = models.JSONField(default=dict(), blank=True, null=True)
+    sensors = models.JSONField(default=dict, blank=True, null=True)
     unique_index = models.CharField(null=True, blank=True)
     owner = models.ForeignKey(
         User, on_delete=models.CASCADE, null=True, blank=True)

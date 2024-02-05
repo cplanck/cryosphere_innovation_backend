@@ -169,8 +169,11 @@ class DeploymentDataEndpoint(viewsets.ViewSet):
         self.check_object_permissions(request, object)
         try:
             response = post_data_to_mongodb_collection(pk, request.data)
+            print(response)
             return Response(response, status=status.HTTP_201_CREATED)
         except Exception as e:
+            print('THIS EXCEPTION RAN')
+            print(e)
             return Response({'There was a problem adding data to the database.'}, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, pk):
@@ -192,11 +195,6 @@ class InstrumentSensorPackageEndpoint(viewsets.ModelViewSet):
     serializer_class = InstrumentSensorPackageSerializer
     filterset_fields = ['template', 'user']
     queryset = InstrumentSensorPackage.objects.all()
-
-    # def get_queryset(self):
-    #     queryset = InstrumentSensorPackage.objects.filter(user=self.request.user)
-    #     return queryset
-
 
 class PredictSensorFields(viewsets.ViewSet):
     """

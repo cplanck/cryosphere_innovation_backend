@@ -8,6 +8,14 @@ from rest_framework.permissions import (AllowAny, BasePermission, IsAdminUser,
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from django.http import JsonResponse
+
+
+from .binaryreader import *
+import collections
+import tempfile
+
+
 
 from instruments.base_models import InstrumentSensorPackage
 
@@ -39,3 +47,29 @@ class DecodeScriptsEndpoint(viewsets.ModelViewSet):
     authentication_classes = [CookieTokenAuthentication]
     queryset = DecodeScript.objects.all().order_by('-last_modified')
     serializer_class = DecodeScriptSerializer
+
+
+class DecodeScriptPreviewEndpoint(viewsets.ViewSet):
+
+    def create(self, request):
+        binary_file = request.FILES.get('file')
+        decode_script_id = request.data['decode_script_id']
+        print(decode_script_id)
+
+        if binary_file:
+            try:
+                sbd_message_bytes = BinaryReader(binary_file)
+                script = DecodeScript.objects.get(id=decode_script_id)
+                if not script.script:
+                    return JsonResponse({'error': 'No decode script found'}, status=400)
+                
+                data = collections.OrderedDict()
+                compiled_script = compile(script.script, "filename", "exec")
+                exec(compiled_script)
+                return Response({'decoded_message':data})
+            except Exception as e:
+                return JsonResponse({'error': str(e)}, status=400)
+
+    authentication_classes = [CookieTokenAuthentication]
+    # queryset = DecodeScript.objects.all().order_by('-last_modified')
+    # serializer_class = DecodeScriptSerializer

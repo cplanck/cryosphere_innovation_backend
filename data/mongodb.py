@@ -57,10 +57,13 @@ def post_data_to_mongodb_collection(collection_name, data):
     collection = db[collection_name]
     try:
         collection.insert_many(data, ordered=False)
-        return 'All documents added to collection' + collection_name
+        rows_inserted = len(data)
+        return {'rows_inserted': rows_inserted, 'rows_rejected': 0}
     except BulkWriteError as e:
-        print(e)
-        return "Documents with duplicate unique indexes found. " + str(e.details[' Inserted']) + ' documents inserted to ' + collection_name
+        total_rows = len(data)
+        rows_rejected = len(e.details['writeErrors'])
+        rows_inserted = total_rows - rows_rejected
+        return {'rows_inserted': rows_inserted, 'rows_rejected': rows_rejected}
 
 
 def get_data_from_mongodb(collection_name, fields=None):
