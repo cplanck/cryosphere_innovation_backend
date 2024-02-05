@@ -24,7 +24,7 @@ def mongo_collection_exists(collection_name):
         return False
 
 
-def create_mongodb_collection(collection_name, unique_index):
+def create_mongodb_collection(collection_name, unique_index=None):
     """
     Create a MongoDB collection given a collection name and unique index.
     The unique index defines a attribute that is forced unique at the database level.
