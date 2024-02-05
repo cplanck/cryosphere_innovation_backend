@@ -64,7 +64,7 @@ def prepare_user_response(user, avatar):
         samesite='None', 
         secure=True, 
         domain=os.environ['COOKIE_DOMAIN'],
-        expires=datetime.utcnow() + timedelta(days=30)
+        # expires=datetime.utcnow() + timedelta(days=30)
         )
     response.set_cookie('refresh_token', str(
         refresh_token), 
@@ -72,7 +72,8 @@ def prepare_user_response(user, avatar):
         samesite='None', 
         secure=True, 
         domain=os.environ['COOKIE_DOMAIN'],
-        expires=datetime.utcnow() + timedelta(days=30))
+        # expires=datetime.utcnow() + timedelta(days=30)
+        )
 
     return response
 
