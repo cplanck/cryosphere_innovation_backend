@@ -64,7 +64,7 @@ def prepare_user_response(user, avatar):
         samesite='None', 
         secure=True, 
         domain=os.environ['COOKIE_DOMAIN'],
-        # expires=datetime.utcnow() + timedelta(days=30)
+        expires=datetime.utcnow() + timedelta(days=30)
         )
     response.set_cookie('refresh_token', str(
         refresh_token), 
@@ -72,7 +72,7 @@ def prepare_user_response(user, avatar):
         samesite='None', 
         secure=True, 
         domain=os.environ['COOKIE_DOMAIN'],
-        # expires=datetime.utcnow() + timedelta(days=30)
+        expires=datetime.utcnow() + timedelta(days=30)
         )
 
     return response
@@ -196,7 +196,13 @@ class RefreshAccessToken(APIView):
                 response = JsonResponse(
                     {'success': 'New access token retrieved'})
                 response.set_cookie('access_token', str(
-                    access_token), httponly=True, samesite='None', secure=True, domain=os.environ['COOKIE_DOMAIN'])
+                    access_token), 
+                    httponly=True, 
+                    samesite='None', 
+                    secure=True, 
+                    domain=os.environ['COOKIE_DOMAIN'],
+                    expires=datetime.utcnow() + timedelta(days=30)
+                    )
                 return response
             except Exception as e:
                 print(e)
