@@ -28,6 +28,7 @@ from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from rest_framework_simplejwt.views import (TokenObtainPairView,
                                             TokenRefreshView, TokenVerifyView)
 from user_profiles.models import UserProfile
+import datetime
 from user_profiles.serializers import UserProfileSerializer
 
 from authentication.http_cookie_authentication import CookieTokenAuthentication
@@ -58,9 +59,20 @@ def prepare_user_response(user, avatar):
         })
 
     response.set_cookie('access_token', str(
-        access_token), httponly=True, samesite='None', secure=True, domain=os.environ['COOKIE_DOMAIN'])
+        access_token), 
+        httponly=True, 
+        samesite='None', 
+        secure=True, 
+        domain=os.environ['COOKIE_DOMAIN'],
+        expires=datetime.utcnow() + timedelta(days=30)
+        )
     response.set_cookie('refresh_token', str(
-        refresh_token), httponly=True, samesite='None', secure=True, domain=os.environ['COOKIE_DOMAIN'])
+        refresh_token), 
+        httponly=True, 
+        samesite='None', 
+        secure=True, 
+        domain=os.environ['COOKIE_DOMAIN'],
+        expires=datetime.utcnow() + timedelta(days=30))
 
     return response
 
