@@ -20,7 +20,7 @@ import tempfile
 from instruments.base_models import InstrumentSensorPackage
 
 from .models import RealTimeData, DecodeScript
-from .serializers import (RealTimeDataSerializer, DecodeScriptSerializer)
+from .serializers import (RealTimeDataSerializer, RealTimeDataPOSTSerializer, DecodeScriptSerializer)
 
 
 class RealTimeDataEndpoint(viewsets.ModelViewSet):
@@ -35,6 +35,14 @@ class RealTimeDataEndpoint(viewsets.ModelViewSet):
     queryset = RealTimeData.objects.all().order_by('-last_modified')
     serializer_class = RealTimeDataSerializer
     filterset_fields = ['active']
+
+    def get_serializer_class(self):
+        
+        if self.request.method == 'GET':
+           
+            return RealTimeDataSerializer
+        else:
+            return RealTimeDataPOSTSerializer
 
 class DecodeScriptsEndpoint(viewsets.ModelViewSet):
 

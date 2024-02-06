@@ -7,6 +7,11 @@ class RealTimeDataSerializer(serializers.ModelSerializer):
         fields = '__all__'
         depth = 2
 
+class RealTimeDataPOSTSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RealTimeData
+        fields = ['deployment', 'active', 'iridium_sbd', 'iridium_imei', 'decode_script', 'id']
+
 class DecodeScriptSerializer(serializers.ModelSerializer):
     class Meta:
         model = DecodeScript
