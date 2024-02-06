@@ -22,12 +22,6 @@ def create_mongo_db_collection_for_deployment(sender, instance, created, **kwarg
         except Exception as e:
             create_mongodb_collection(str(instance.data_uuid))
 
-        # create_mongodb_collection(str(instance.data_uuid), instance.instrument.unique_index)
-        # create_mongodb_collection(str(instance.data_uuid), unique_index)
-
-        # Save the unique index from the instrument to the deployment
-
-
 
 @receiver(post_delete, sender=Deployment)
 def delete_mongo_db_collection_for_deployment(sender, instance, **kwargs):
