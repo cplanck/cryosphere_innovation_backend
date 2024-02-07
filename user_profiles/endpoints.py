@@ -89,7 +89,7 @@ class UserEndpoint(viewsets.ModelViewSet):
     authentication_classes = [CookieTokenAuthentication]
     permission_classes = [IsAdminUser]
     serializer_class = UserSerializer
-    queryset = User.objects.all()
+    # queryset = User.objects.all()
 
     def create(self, request, *args, **kwargs):
         data = request.data.copy()
@@ -107,6 +107,9 @@ class UserEndpoint(viewsets.ModelViewSet):
         except Exception as e:
             print(e)
             return Response('There was a problem creating this user', status=status.HTTP_400_BAD_REQUEST)
+    
+    def get_queryset(self):
+        return User.objects.all().order_by('first_name')
 
 
 class DashboardDeploymentMigration(viewsets.ModelViewSet):
