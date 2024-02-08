@@ -133,7 +133,7 @@ class GoogleOneTap(APIView):
                     if user_info_from_google['given_name']:
                         user.first_name = user_info_from_google['given_name']
                 except:
-                    user.first_name = 'no_given_name'
+                    user.first_name = ''
                 try:
                     if user_info_from_google['family_name']:
                         user.last_name = user_info_from_google['family_name']
