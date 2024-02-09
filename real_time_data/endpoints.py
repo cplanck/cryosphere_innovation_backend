@@ -171,14 +171,14 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
                     request.META['CONTENT_TYPE'] = 'application/json'
                 
             pub_sub_history_id = request.data['historyId']
-            print('PUB SUB HISTORY ID', pub_sub_history_id)
 
             try:
                 email, subject, message_id = get_gmail_from_pub_sub_body(pub_sub_history_id)
                 print('GMAIL RECEIVED, EMAIL: ', email)
                 print('GMAIL RECEIVED, SUBJECT: ', subject)
-            except:
-                print('No message found for this ID')
+            except Exception as e:
+                print('No email found for this ID')
+                print(e)
             
             if subject and len(subject.get('value', '')) >= 18 and subject['value'][:18] == 'SBD Msg From Unit:':
             # if subject['value'][:18] == 'SBD Msg From Unit:':
