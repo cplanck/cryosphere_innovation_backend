@@ -34,6 +34,7 @@ from django.http.request import QueryDict
 import os
 from real_time_data.models import *
 import pickle
+import time
 
 GMAIL_SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 
@@ -114,11 +115,13 @@ def get_gmail_from_pub_sub_body(history_id):
     Takes a historyId from a Gmail Pub/Sub subscription and fetchs the email that triggered the event
     by looking at the messagesAdded event. 
     """
+
+    time.sleep(5)
     
     # Fetch the history record using the history ID
     history_record = gmail_service.users().history().list(userId='me', startHistoryId=history_id).execute()
 
-    print(history_record)
+    print('HISTORY RECORD: ', history_record)
 
     if 'history' in history_record:
         message_id = history_record['history'][0]['messages'][0]['id']

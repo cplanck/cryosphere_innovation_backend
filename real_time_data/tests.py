@@ -29,7 +29,7 @@ class TestSBDPubSubPostRequest(APITestCase):
 
     def test_sbd_pub_sub_post_request(self):
 
-        sample_pub_sub_payload = {'emailAddress': 'iridiumdata@cryosphereinnovation.com', 'historyId': 5930260}
+        sample_pub_sub_payload = {'emailAddress': 'iridiumdata@cryosphereinnovation.com', 'historyId': '5930629'}
 
         url = reverse('sbd_gmail_pub_sub-list')
         response = self.client.post(url, format='json', data=sample_pub_sub_payload)
