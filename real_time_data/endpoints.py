@@ -170,6 +170,7 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
                 request.META['CONTENT_TYPE'] = 'application/json'
         try:
             data = request.data  # Parse the JSON payload
+            print(data)
         except Exception as e:
             print(e)
 
