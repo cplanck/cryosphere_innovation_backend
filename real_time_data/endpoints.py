@@ -22,8 +22,6 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-# from oauth2client import client, tools
-# from oauth2client.file import Storage
 import base64
 from io import BytesIO
 import io
@@ -32,6 +30,10 @@ import collections
 from instruments.base_models import InstrumentSensorPackage
 from .models import RealTimeData, DecodeScript
 from .serializers import (RealTimeDataSerializer, RealTimeDataPOSTSerializer, DecodeScriptSerializer)
+
+from pathlib import Path
+THIS_FOLDER = Path(__file__).parent.resolve()
+SERVICE_ACCOUNT_FILE = THIS_FOLDER / "gmail_service_account_token.json"
 
 GMAIL_SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 SERVICE_ACCOUNT_FILE = 'gmail_service_account_token.json'
