@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.db import transaction
 from django.http import JsonResponse
+import datetime
 import json
 import base64
 import boto3
@@ -36,6 +37,7 @@ import os
 from real_time_data.models import *
 import pickle
 import time
+import pytz
 
 GMAIL_SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 
@@ -135,8 +137,17 @@ def get_gmail_from_pub_sub_body(history_id):
     # Next: fetch data for this id if message == SBD...
 
 
-def get_recent_gmails():
-    search_query = 'newer_than:1m'
+def get_recent_gmails(seconds_ago=60):
+
+    pacific_timezone = pytz.timezone('US/Pacific')
+    current_time_utc = datetime.datetime.utcnow()
+    current_time_pacific = current_time_utc.astimezone(pacific_timezone)
+    time_600_seconds_ago = current_time_pacific - datetime.timedelta(seconds=seconds_ago)
+    unix_timestamp = int(time_600_seconds_ago.timestamp())
+
+    # Define the search query
+    search_query = f'after:{unix_timestamp}'
+
     response = gmail_service.users().messages().list(userId='me', q=search_query).execute()
     return response
 
@@ -291,18 +302,20 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
 
         # email, subject, message_id = get_gmail_from_pub_sub_body(pub_sub_history_id)
 
-        email_list_less_than_1_min_ago = get_recent_gmails()
+        email_list_less_than_1_min_ago = get_recent_gmails(5)
         print('EMAIL LIST FROM LESS THAN 1 MIN AGO: ')
 
-        for message in email_list_less_than_1_min_ago['messages']:
-            print(message['id'])
-            try:
-                binary_message_object, file_name, imei = get_gmail_from_message_id(message['id'])
-                print(file_name)
-                print(imei)
-            except Exception as e:
-                print(e)
-                print('There was a problem retreiving the email')
+        print(email_list_less_than_1_min_ago)
+        if 'messages' in email_list_less_than_1_min_ago:
+            for message in email_list_less_than_1_min_ago['messages']:
+                print(message['id'])
+                try:
+                    binary_message_object, file_name, imei = get_gmail_from_message_id(message['id'])
+                    print(file_name)
+                    print(imei)
+                except Exception as e:
+                    print(e)
+                    print('There was a problem retreiving the email')
 
         return Response({}, status=200)
 
