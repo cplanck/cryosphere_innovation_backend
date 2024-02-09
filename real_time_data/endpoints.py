@@ -170,11 +170,7 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
                 request.META['CONTENT_TYPE'] = 'application/json'
      
         print('REQUEST DATA: ', request.data)
-        # pub_sub_message_body = base64.b64decode(request.data['body'].encode("utf-8"))
-        # print(pub_sub_message_body)
-        # print('PUB SUB MESSAGE BODY', pub_sub_message_body)
-       
-
+        
         pub_sub_history_id = request.data['historyId']
         print('PUB SUB HISTORY ID', pub_sub_history_id)
 
@@ -195,3 +191,5 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
             print(subject)
             print(imei)
             return JsonResponse({'subject': subject, 'email': email})
+        else:
+            return Response({})
