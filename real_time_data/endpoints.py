@@ -292,7 +292,17 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
         # email, subject, message_id = get_gmail_from_pub_sub_body(pub_sub_history_id)
 
         email_list_less_than_1_min_ago = get_recent_gmails()
-        print('EMAIL LIST FROM LESS THAN 1 MIN AGO: ', email_list_less_than_1_min_ago)
+        print('EMAIL LIST FROM LESS THAN 1 MIN AGO: ')
+
+        for message in email_list_less_than_1_min_ago['messages']:
+            print(message['id'])
+            try:
+                binary_message_object, file_name, imei = get_gmail_from_message_id(message['id'])
+                print(file_name)
+                print(imei)
+            except Exception as e:
+                print(e)
+                print('There was a problem retreiving the email')
 
         return Response({}, status=200)
 
