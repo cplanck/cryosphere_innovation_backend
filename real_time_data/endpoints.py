@@ -302,9 +302,10 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
                 request.META['CONTENT_TYPE'] = 'application/json'
         
         print(request.data)
-        # pub_sub_history_id = request.data['historyId']
-
-        # email, subject, message_id = get_gmail_from_pub_sub_body(pub_sub_history_id)
+        pub_sub_history_id = request.data['historyId']
+        email, subject, message_id = get_gmail_from_pub_sub_body(pub_sub_history_id)
+        binary_message_object, file_name, imei = get_gmail_from_message_id(message_id)
+        print(file_name)
 
         time.sleep(5)
         email_list_less_than_1_min_ago = get_recent_gmails(30)
