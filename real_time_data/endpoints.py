@@ -116,7 +116,7 @@ def get_gmail_from_pub_sub_body(history_id):
     by looking at the messagesAdded event. 
     """
 
-    time.sleep(5)
+    time.sleep(1)
     
     # Fetch the history record using the history ID
     history_record = gmail_service.users().history().list(userId='me', startHistoryId=history_id).execute()
