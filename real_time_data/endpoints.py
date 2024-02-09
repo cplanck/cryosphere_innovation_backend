@@ -167,6 +167,7 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
         print(request.content_type)
 
         if not request.content_type or request.content_type == '':
+                request_body = QueryDict(request.body)
                 request.content_type = 'application/json'
         try:
             data = request.json()  # Parse the JSON payload
