@@ -166,6 +166,7 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
             print('IS THIS RUNNING AT ALL?')
             print(request)
             # print(request.META)
+            print(data = request.json())
             print(str(request.data))
             print(request.data)
             print(type(request.data))
