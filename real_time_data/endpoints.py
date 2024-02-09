@@ -174,8 +174,8 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
 
             try:
                 email, subject, message_id = get_gmail_from_pub_sub_body(pub_sub_history_id)
-                print('GMAIL RECEIVED, EMAIL: ', email)
                 print('GMAIL RECEIVED, SUBJECT: ', subject)
+                print('GMAIL RECEIVED, EMAIL: ', email)
             except Exception as e:
                 print('No email found for this ID')
                 print(e)
