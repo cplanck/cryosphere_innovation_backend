@@ -302,8 +302,8 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
 
         # email, subject, message_id = get_gmail_from_pub_sub_body(pub_sub_history_id)
 
-        email_list_less_than_1_min_ago = get_recent_gmails(1)
-        print('EMAIL LIST FROM LESS THAN 1 SECOND AGO: ')
+        email_list_less_than_1_min_ago = get_recent_gmails(5)
+        print('EMAIL LIST FROM LESS THAN 5 SECOND AGO: ')
 
         print(email_list_less_than_1_min_ago)
         if 'messages' in email_list_less_than_1_min_ago:
