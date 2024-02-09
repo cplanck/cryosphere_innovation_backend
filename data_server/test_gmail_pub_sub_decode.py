@@ -28,7 +28,7 @@ from io import BytesIO
 # from decode_scripts import decode_sbd, dynamic_decode
 
 GMAIL_SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
-SERVICE_ACCOUNT_FILE = 'service_account_token.json'
+SERVICE_ACCOUNT_FILE = 'gmail_service_account_token.json'
 DELEGATE = 'iridiumdata@cryosphereinnovation.com'
 
 # Load service account credentials from file
@@ -92,12 +92,12 @@ gmail_service = build('gmail', 'v1', credentials=credentials_delegated)
 request = {
     'labelIds': ['INBOX'],
     'topicName': 'projects/cryosphere-innovation/topics/sbd-data-download-lambda-trigger',
-    'historyTypes': ['messsageAdded'],
+    'historyTypes': ['messageAdded'],
 }
 
 # Execute watch request on Gmail inbox
-# r = gmail_service.users().watch(userId=DELEGATE, body=request).execute()
-# print(r)
+r = gmail_service.users().watch(userId=DELEGATE, body=request).execute()
+print(r)
 
 
 def get_email_from_pub_sub_body(history_id):
@@ -119,14 +119,15 @@ def get_email_from_pub_sub_body(history_id):
     # Next: fetch data for this id if message == SBD...
 
             
-data_string_from_pub_sub = 'eyJlbWFpbEFkZHJlc3MiOiJpcmlkaXVtZGF0YUBjcnlvc3BoZXJlaW5ub3ZhdGlvbi5jb20iLCJoaXN0b3J5SWQiOjU5MjIyODh9'
-decoded_data_string = base64.b64decode(data_string_from_pub_sub).decode('utf-8')
+get_email_from_pub_sub_body('5927830')
+# data_string_from_pub_sub = 'eyJlbWFpbEFkZHJlc3MiOiJpcmlkaXVtZGF0YUBjcnlvc3BoZXJlaW5ub3ZhdGlvbi5jb20iLCJoaXN0b3J5SWQiOjU5MjIyODh9'
+# decoded_data_string = base64.b64decode(data_string_from_pub_sub).decode('utf-8')
 
-print(decoded_data_string)
-history_id = json.loads(decoded_data_string)['historyId']
+# print(decoded_data_string)
+# history_id = json.loads(decoded_data_string)['historyId']
 
-try:
-    get_email_from_pub_sub_body(history_id)
-except Exception as e:
-    print(e)
-    print('No new message')
+# try:
+#     get_email_from_pub_sub_body(history_id)
+# except Exception as e:
+#     print(e)
+#     print('No new message')
