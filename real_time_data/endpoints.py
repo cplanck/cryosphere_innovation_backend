@@ -166,32 +166,36 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
 
         print('INSIDE GMAIL PUB SUB ENDPOINT')
 
-        if not request.content_type or request.content_type == '':
-                request.META['CONTENT_TYPE'] = 'application/json'
-             
-        pub_sub_history_id = request.data['historyId']
-        print('PUB SUB HISTORY ID', pub_sub_history_id)
-
         try:
-            email, subject, message_id = get_gmail_from_pub_sub_body(pub_sub_history_id)
-            print('GMAIL RECEIVED, EMAIL: ', email)
-            print('GMAIL RECEIVED, SUBJECT: ', subject)
+            if not request.content_type or request.content_type == '':
+                    request.META['CONTENT_TYPE'] = 'application/json'
+                
+            pub_sub_history_id = request.data['historyId']
+            print('PUB SUB HISTORY ID', pub_sub_history_id)
+
+            try:
+                email, subject, message_id = get_gmail_from_pub_sub_body(pub_sub_history_id)
+                print('GMAIL RECEIVED, EMAIL: ', email)
+                print('GMAIL RECEIVED, SUBJECT: ', subject)
+            except:
+                print('No message found for this ID')
+            
+            if subject and len(subject.get('value', '')) >= 18 and subject['value'][:18] == 'SBD Msg From Unit:':
+            # if subject['value'][:18] == 'SBD Msg From Unit:':
+                print('SBD MESSAGE RECEIVED')
+                # message is (likely) from Iridium (note: only checking the subject, not the sender)
+                binary_message_object, file_name = get_binary_message_attachment(message_id)
+                imei = file_name[:15]
+                # extract binary file if it exists
+                # associate an active Real-time data object
+                # decode using Lambda function
+                # store file on S3 and in database
+                # post to mongodb
+                if binary_message_object:
+                    print('BINARY MESSAGE FOUND:')
+                    print(binary_message_object)
+                return JsonResponse({'subject': subject, 'email': email}, status=200)
+            else:
+                return Response({}, status=200)
         except:
-            print('No message found for this ID')
-        
-        if subject['value'][:18] == 'SBD Msg From Unit:':
-            print('SBD MESSAGE RECEIVED')
-            # message is (likely) from Iridium (note: only checking the subject, not the sender)
-            binary_message_object, file_name = get_binary_message_attachment(message_id)
-            imei = file_name[:15]
-            # extract binary file if it exists
-            # associate an active Real-time data object
-            # decode using Lambda function
-            # store file on S3 and in database
-            # post to mongodb
-            if binary_message_object:
-                print('BINARY MESSAGE FOUND:')
-                print(binary_message_object)
-            return JsonResponse({'subject': subject, 'email': email})
-        else:
-            return Response({})
+            return Response({}, status=200)
