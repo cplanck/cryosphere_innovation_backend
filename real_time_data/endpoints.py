@@ -166,6 +166,7 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
         pub_sub_message_body = json.loads(base64.b64decode(request.data['body'].encode("utf-8")))
         pub_sub_history_id = pub_sub_message_body['historyId']
         email, subject, message_id = get_gmail_from_pub_sub_body(pub_sub_history_id)
+        print('GMAIL RECEIVED, SUBJECT: ', subject)
         
         if subject['value'][:18] == 'SBD Msg From Unit:':
             # message is (likely) from Iridium (note: only checking the subject, not the sender)
