@@ -169,13 +169,13 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
         if not request.content_type or request.content_type == '':
                 request.META['CONTENT_TYPE'] = 'application/json'
      
-        print('REQUEST DATA: ',request.data)
-        pub_sub_message_body = base64.b64decode(request.data['body'].encode("utf-8"))
-        print(pub_sub_message_body)
-        print('PUB SUB MESSAGE BODY', pub_sub_message_body)
+        print('REQUEST DATA: ', request.data)
+        # pub_sub_message_body = base64.b64decode(request.data['body'].encode("utf-8"))
+        # print(pub_sub_message_body)
+        # print('PUB SUB MESSAGE BODY', pub_sub_message_body)
        
 
-        pub_sub_history_id = pub_sub_message_body['historyId']
+        pub_sub_history_id = request.data['historyId']
         print('PUB SUB HISTORY ID', pub_sub_history_id)
 
         email, subject, message_id = get_gmail_from_pub_sub_body(pub_sub_history_id)
