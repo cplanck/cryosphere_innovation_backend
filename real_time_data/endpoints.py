@@ -147,6 +147,7 @@ def get_recent_gmails(seconds_ago=60):
 
     # Define the search query
     search_query = f'after:{unix_timestamp}'
+    print(search_query)
 
     response = gmail_service.users().messages().list(userId='me', q=search_query).execute()
     return response
@@ -289,7 +290,7 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
 
         """
         Endpoint attached to the Gmail Pub/Sub push endpoint. 
-        Gmail doesnt cake in email data to the pub/sub endpoint, so we 
+        Gmail doesnt bake in email data to the pub/sub endpoint, so we 
         simply poll the inbox and loop through all messages that arrived in 
         the last 5 seconds when theres a notification of a change.
 
@@ -301,19 +302,23 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
         if not request.content_type or request.content_type == '':
                 request.META['CONTENT_TYPE'] = 'application/json'
         
-        print(request.data)
-        pub_sub_history_id = request.data['historyId']
-        email, subject, message_id = get_gmail_from_pub_sub_body(pub_sub_history_id)
-        binary_message_object, file_name, imei = get_gmail_from_message_id(message_id)
-        print(file_name)
+        # print(request.data)
+        # pub_sub_history_id = request.data['historyId']
+        # email, subject, message_id = get_gmail_from_pub_sub_body(pub_sub_history_id)
+        # binary_message_object, file_name, imei = get_gmail_from_message_id(message_id)
+        # print(file_name)
 
-        time.sleep(5)
-        email_list_less_than_1_min_ago = get_recent_gmails(30)
-        print('EMAIL LIST FROM LESS THAN 5 SECOND AGO: ')
-
-        print(email_list_less_than_1_min_ago)
-        if 'messages' in email_list_less_than_1_min_ago:
-            for message in email_list_less_than_1_min_ago['messages']:
+        # time.sleep(5)
+                
+        try:
+            recent_email_list = get_recent_gmails(30)
+        except Exception as e:
+            # if no recent messages are found, return a 400 so Pub/Sub tries again
+            return Response('No message found', status=400)
+        
+        print(recent_email_list)
+        if 'messages' in recent_email_list:
+            for message in recent_email_list['messages']:
                 print(message['id'])
                 try:
                     binary_message_object, file_name, imei = get_gmail_from_message_id(message['id'])
