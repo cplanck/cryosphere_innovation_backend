@@ -168,35 +168,10 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
 
         if not request.content_type or request.content_type == '':
                 request.META['CONTENT_TYPE'] = 'application/json'
-        try:
-            data = request.data  # Parse the JSON payload
-            print(data)
-        except Exception as e:
-            print(e)
-
-        try:
-            print('YOU MADE IT HERE 1')
-            print(request)
-            data = json.loads(request)
-            print(data)
-        except Exception as e:
-            print('YOU MADE IT HERE 2')
-            print(e)
-            print("Request Headers:", dict(request.headers))
-            
-        finally:
-            
-            print('YOU MADE IT HERE 3')
-            print(type(request.data))
-
-
-
-
-        print(data)
-        print(str(request.data))
-        print(request.data)
-        print(type(request.data))
+     
+        print('REQUEST DATA: ',request.data)
         pub_sub_message_body = base64.b64decode(request.data['body'].encode("utf-8"))
+        print(pub_sub_message_body)
         print('PUB SUB MESSAGE BODY', pub_sub_message_body)
        
 
