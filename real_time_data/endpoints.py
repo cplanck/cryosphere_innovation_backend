@@ -179,10 +179,6 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
         except:
             print('No message found for this ID')
         
-        print(subject)
-        print(subject['value'])
-        print(subject['value'][:18])
-
         if subject['value'][:18] == 'SBD Msg From Unit:':
             print('SBD MESSAGE RECEIVED')
             # message is (likely) from Iridium (note: only checking the subject, not the sender)
@@ -194,9 +190,8 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
             # store file on S3 and in database
             # post to mongodb
             if binary_message_object:
+                print('BINARY MESSAGE FOUND:')
                 print(binary_message_object)
-            print(subject)
-            print(imei)
             return JsonResponse({'subject': subject, 'email': email})
         else:
             return Response({})
