@@ -163,7 +163,7 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
         Written 8 Feb 2024
         """
         print('IS THIS RUNNING AT ALL?')
-        pub_sub_message_body = json.loads(base64.b64decode(request.data['body'].encode("utf-8")))
+        pub_sub_message_body = base64.b64decode(request.data['body'].encode("utf-8"))
         print('PUB SUB MESSAGE BODY', pub_sub_message_body)
 
         pub_sub_history_id = pub_sub_message_body['historyId']
