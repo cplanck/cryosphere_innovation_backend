@@ -161,6 +161,9 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
         Takes a POST request from the Gmail Pub/Sub and extracts the email that caused the 
         Pub/Sub trigger. 
 
+        Note: this endpoint must return an OK (~200) status code or the Gmail Pub/Sub endpoint
+        will continue to retry. 
+
         Written 8 Feb 2024
         """
 
@@ -169,7 +172,8 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
         try:
             if not request.content_type or request.content_type == '':
                     request.META['CONTENT_TYPE'] = 'application/json'
-                
+            
+            print(request.data)
             pub_sub_history_id = request.data['historyId']
             email, subject, message_id = get_gmail_from_pub_sub_body(pub_sub_history_id)
 
@@ -181,6 +185,7 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
                 # message is (likely) from Iridium (note: only checking the subject, not the sender)
                 binary_message_object, file_name = get_binary_message_attachment(message_id)
                 imei = file_name[:15]
+                
                 # extract binary file if it exists
                 # associate an active Real-time data object
                 # decode using Lambda function
@@ -193,6 +198,5 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
             else:
                 return Response({}, status=200)
         except Exception as e:
-            print('ERROR INSIDE THE MAIN TRY BLOCK')
-            print(e)
+            print('Error, likely no message ID found: ', e)
             return Response({}, status=200)
