@@ -192,6 +192,7 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
                 return JsonResponse({'subject': subject, 'email': email}, status=200)
             else:
                 return Response({}, status=200)
-        except:
+        except Exception as e:
             print('ERROR INSIDE THE MAIN TRY BLOCK')
+            print(e)
             return Response({}, status=200)
