@@ -32,6 +32,8 @@ from .models import RealTimeData, DecodeScript
 from .serializers import (RealTimeDataSerializer, RealTimeDataPOSTSerializer, DecodeScriptSerializer)
 from django.http.request import QueryDict
 import os
+from real_time_data.models import *
+import pickle
 
 GMAIL_SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 
@@ -185,7 +187,9 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
                 # message is (likely) from Iridium (note: only checking the subject, not the sender)
                 binary_message_object, file_name = get_binary_message_attachment(message_id)
                 imei = file_name[:15]
-                
+                print(imei)
+                real_time_data_object = RealTimeData.objects.filter(iridium_imei=imei).first()
+
                 # extract binary file if it exists
                 # associate an active Real-time data object
                 # decode using Lambda function
@@ -194,6 +198,23 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
                 if binary_message_object:
                     print('BINARY MESSAGE FOUND:')
                     print(binary_message_object)
+                    if real_time_data_object:
+                        print('Real time data object found for this IMEI:')
+                        try:
+                            sbd_data_object = SBDData(deployment=real_time_data_object.deployment, sbd_filename=file_name, sbd_binary=binary_message_object.getvalue())
+                            sbd_data_object.save()
+                            # sample = SBDData.objects.get(deployment=real_time_data_object.deployment)
+                            # print(sample.deployment)
+                            # # print(sample.sbd_binary.tobytes())
+
+                            # byte_data = sample.sbd_binary.tobytes()
+                            # for byte in byte_data:
+                            #     print('{:02x}'.format(byte))
+
+                            # print(sample.sbd_filename)
+                        except Exception as e:
+                            print(e)
+
                 return JsonResponse({'subject': subject, 'email': email}, status=200)
             else:
                 return Response({}, status=200)

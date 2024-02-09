@@ -35,6 +35,6 @@ class RealTimeData(models.Model):
 class SBDData(models.Model):
     deployment = models.OneToOneField(Deployment, on_delete=models.SET_NULL, blank=True, null=True)
     sbd_binary = models.BinaryField()
-    sbd_filename = models.CharField(null=True, blank=True)
+    sbd_filename = models.CharField(null=True, blank=True, unique=True)
     date_added = models.DateTimeField(auto_now_add=True, null=True)
     last_modified = models.DateTimeField(auto_now=True, null=True)
