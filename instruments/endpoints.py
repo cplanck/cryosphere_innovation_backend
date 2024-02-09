@@ -48,9 +48,6 @@ class InstrumentEndpoint(viewsets.ModelViewSet):
 
     def partial_update(self, request, *args, **kwargs):
         try:
-            print('YOU MADE IT')
-            # Your custom logic here
-            print(request.data)
             return super().partial_update(request, *args, **kwargs)
         except Exception as e:
             print(f"An error occurred: {e}")

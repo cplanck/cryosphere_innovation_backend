@@ -31,3 +31,10 @@ class RealTimeData(models.Model):
     class Meta:
         verbose_name = 'Real-Time Data'
         verbose_name_plural = 'Real-Time Data'
+
+class SBDData(models.Model):
+    deployment = models.OneToOneField(Deployment, on_delete=models.SET_NULL, blank=True, null=True)
+    sbd_binary = models.BinaryField()
+    sbd_filename = models.CharField(null=True, blank=True)
+    date_added = models.DateTimeField(auto_now_add=True, null=True)
+    last_modified = models.DateTimeField(auto_now=True, null=True)

@@ -5,6 +5,9 @@ from real_time_data.endpoints import *
 
 router = routers.DefaultRouter()
 
+router.register('sbd_gmail_pub_sub', SBDGmailPubSubEndpoint,
+                basename='sbd_gmail_pub_sub')
+
 router.register('decode-scripts/preview', DecodeScriptPreviewEndpoint,
                 basename='sbd_message_preview')
 
