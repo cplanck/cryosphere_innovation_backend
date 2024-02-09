@@ -94,12 +94,12 @@ gmail_service = build('gmail', 'v1', credentials=credentials_delegated)
 request = {
     'labelIds': ['INBOX'],
     'topicName': 'projects/cryosphere-innovation/topics/sbd-data-download-lambda-trigger',
-    'historyTypes': ['messagesAdded'],
+    'historyTypes': ['messageAdded'],
 }
 
 # Execute watch request on Gmail inbox
-# r = gmail_service.users().watch(userId=DELEGATE, body=request).execute()
-# print(r)
+r = gmail_service.users().watch(userId=DELEGATE, body=request).execute()
+print(r)
 
 
 # def get_email_from_pub_sub_body(history_id):
@@ -150,11 +150,11 @@ def get_gmail_from_pub_sub_body(history_id):
 
     return email_message, subject_dict, message_id
 
-email_message, subject_dict, message_id = get_gmail_from_pub_sub_body('5928576')   
+# email_message, subject_dict, message_id = get_gmail_from_pub_sub_body('5928576')   
 
-print(email_message)
-print(subject_dict['value'])
-print(message_id)
+# print(email_message)
+# print(subject_dict['value'])
+# print(message_id)
 
 
 

@@ -303,7 +303,7 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
         # email, subject, message_id = get_gmail_from_pub_sub_body(pub_sub_history_id)
 
         email_list_less_than_1_min_ago = get_recent_gmails(1)
-        print('EMAIL LIST FROM LESS THAN 1 MIN AGO: ')
+        print('EMAIL LIST FROM LESS THAN 1 SECOND AGO: ')
 
         print(email_list_less_than_1_min_ago)
         if 'messages' in email_list_less_than_1_min_ago:
@@ -311,11 +311,17 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
                 print(message['id'])
                 try:
                     binary_message_object, file_name, imei = get_gmail_from_message_id(message['id'])
+                    real_time_data_object = RealTimeData.objects.filter(iridium_imei=imei).first()
+                    if real_time_data_object:
+                        print('REAL TIME DATA OBJECT FOUND')
+                        sbd_data_object = SBDData(deployment=real_time_data_object.deployment, sbd_filename=file_name, sbd_binary=binary_message_object.getvalue())
+                        sbd_data_object.save()
+                        
                     print(file_name)
                     print(imei)
                 except Exception as e:
                     print(e)
-                    print('There was a problem retreiving the email')
+                    print('There was a problem retreiving the email or creating the SBD data object')
 
         return Response({}, status=200)
 
