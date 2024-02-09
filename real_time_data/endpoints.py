@@ -164,8 +164,13 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
         """
 
         pub_sub_message_body = json.loads(base64.b64decode(request.data['body'].encode("utf-8")))
+        print('PUB SUB MESSAGE BODY', pub_sub_message_body)
+
         pub_sub_history_id = pub_sub_message_body['historyId']
+        print('PUB SUB HISTORY ID', pub_sub_history_id)
+
         email, subject, message_id = get_gmail_from_pub_sub_body(pub_sub_history_id)
+        print('GMAIL RECEIVED, EMAIL: ', email)
         print('GMAIL RECEIVED, SUBJECT: ', subject)
         
         if subject['value'][:18] == 'SBD Msg From Unit:':
