@@ -92,7 +92,7 @@ gmail_service = build('gmail', 'v1', credentials=credentials_delegated)
 request = {
     'labelIds': ['INBOX'],
     'topicName': 'projects/cryosphere-innovation/topics/sbd-data-download-lambda-trigger',
-    'historyTypes': ['messageAdded'],
+    'historyTypes': ['messagesAdded'],
 }
 
 # Execute watch request on Gmail inbox
@@ -109,6 +109,7 @@ def get_email_from_pub_sub_body(history_id):
     # Fetch the history record using the history ID
     history_record = gmail_service.users().history().list(userId='me', startHistoryId=history_id).execute()
 
+    print(history_record)
     # print(history_record['history'])
     message_added = next((d for d in history_record['history'] if 'messagesAdded' in d), None)
     print('MESSAGE ADDED', message_added['messages'][0]['id'])
@@ -119,7 +120,7 @@ def get_email_from_pub_sub_body(history_id):
     # Next: fetch data for this id if message == SBD...
 
             
-get_email_from_pub_sub_body('5927830')
+get_email_from_pub_sub_body('5928151')
 # data_string_from_pub_sub = 'eyJlbWFpbEFkZHJlc3MiOiJpcmlkaXVtZGF0YUBjcnlvc3BoZXJlaW5ub3ZhdGlvbi5jb20iLCJoaXN0b3J5SWQiOjU5MjIyODh9'
 # decoded_data_string = base64.b64decode(data_string_from_pub_sub).decode('utf-8')
 

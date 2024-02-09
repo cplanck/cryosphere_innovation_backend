@@ -178,9 +178,9 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
                 print('GMAIL RECEIVED, SUBJECT: ', subject)
                 print('GMAIL RECEIVED, EMAIL: ', email)
             except Exception as e:
-                print('No email found for this ID, Returned 404 so it retries')
+                print('No email found for this ID')
                 print(e)
-                return Response({}, status=404)
+                return Response({}, status=200)
 
             
             if subject and len(subject.get('value', '')) >= 18 and subject['value'][:18] == 'SBD Msg From Unit:':
