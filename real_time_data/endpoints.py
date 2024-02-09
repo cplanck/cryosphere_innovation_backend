@@ -171,6 +171,7 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
                     request.META['CONTENT_TYPE'] = 'application/json'
                 
             pub_sub_history_id = request.data['historyId']
+            print('PUB SUB HISTORY ID', pub_sub_history_id)
 
             try:
                 email, subject, message_id = get_gmail_from_pub_sub_body(pub_sub_history_id)
@@ -198,4 +199,5 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
             else:
                 return Response({}, status=200)
         except:
+            print('ERROR INSIDE THE MAIN TRY BLOCK')
             return Response({}, status=200)
