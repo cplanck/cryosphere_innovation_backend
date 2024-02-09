@@ -30,6 +30,7 @@ import collections
 from instruments.base_models import InstrumentSensorPackage
 from .models import RealTimeData, DecodeScript
 from .serializers import (RealTimeDataSerializer, RealTimeDataPOSTSerializer, DecodeScriptSerializer)
+from django.http.request import QueryDict
 import os
 
 GMAIL_SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
@@ -164,11 +165,9 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
         """
 
         print('INSIDE GMAIL PUB SUB ENDPOINT')
-        print(request.content_type)
 
         if not request.content_type or request.content_type == '':
-                request_body = QueryDict(request.body)
-                request.content_type = 'application/json'
+                request.META['CONTENT_TYPE'] = 'application/json'
         try:
             data = request.json()  # Parse the JSON payload
         except Exception as e:
