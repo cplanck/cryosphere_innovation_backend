@@ -165,6 +165,7 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
         try:
             print('IS THIS RUNNING AT ALL?')
             print(request)
+            print(request.META)
             print(request.data)
             print(type(request.data))
             pub_sub_message_body = base64.b64decode(request.data['body'].encode("utf-8"))
