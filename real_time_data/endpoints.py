@@ -116,9 +116,9 @@ def get_gmail_from_pub_sub_body(history_id):
     # Fetch the history record using the history ID
     history_record = gmail_service.users().history().list(userId='me', startHistoryId=history_id).execute()
 
-    # print(history_record['history'])
-    message_added = next((d for d in history_record['history'] if 'messagesAdded' in d), None)
-    message_id = message_added['messages'][0]['id']
+    if 'history' in history_record:
+        message_id = history_record['history'][0]['messages'][0]['id']
+
     email_message = gmail_service.users().messages().get(userId='me', id=message_id).execute()
     subject_dict = next((d for d in email_message['payload']['headers'] if d.get('name') == 'Subject'), None)
 
@@ -171,20 +171,12 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
                     request.META['CONTENT_TYPE'] = 'application/json'
                 
             pub_sub_history_id = request.data['historyId']
-            print('PUB SUB HISTORY ID', pub_sub_history_id)
+            email, subject, message_id = get_gmail_from_pub_sub_body(pub_sub_history_id)
 
-            try:
-                email, subject, message_id = get_gmail_from_pub_sub_body(pub_sub_history_id)
-                print('GMAIL RECEIVED, SUBJECT: ', subject)
-                print('GMAIL RECEIVED, EMAIL: ', email)
-            except Exception as e:
-                print('No email found for this ID')
-                print(e)
-                return Response({}, status=200)
-
+            print('EMAIL: ', email)
+            print('SUBJECT ', subject)
             
-            if subject and len(subject.get('value', '')) >= 18 and subject['value'][:18] == 'SBD Msg From Unit:':
-            # if subject['value'][:18] == 'SBD Msg From Unit:':
+            if subject and len(subject['value']) >= 18 and subject['value'][:18] == 'SBD Msg From Unit:':
                 print('SBD MESSAGE RECEIVED')
                 # message is (likely) from Iridium (note: only checking the subject, not the sender)
                 binary_message_object, file_name = get_binary_message_attachment(message_id)

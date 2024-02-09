@@ -96,31 +96,69 @@ request = {
 }
 
 # Execute watch request on Gmail inbox
-r = gmail_service.users().watch(userId=DELEGATE, body=request).execute()
-print(r)
+# r = gmail_service.users().watch(userId=DELEGATE, body=request).execute()
+# print(r)
 
 
-def get_email_from_pub_sub_body(history_id):
+# def get_email_from_pub_sub_body(history_id):
+
+#     """
+#     Takes a historyId from a Gmail Pub/Sub subscription and fetchs the email that triggered the event
+#     by looking at the messagesAdded event. 
+#     """
+#     # Fetch the history record using the history ID
+#     history_record = gmail_service.users().history().list(userId='me', startHistoryId=history_id).execute()
+
+#     # print(history_record)
+
+#     if 'history' in history_record:
+#         message_id = history_record['history'][0]['messages'][0]['id']
+#     # print(history_record['history'])
+#     # message_added = next((d for d in history_record['history'] if 'messagesAdded' in d), None)
+#     # print('MESSAGE ADDED', message_added['messages'][0]['id'])
+#     # message_id = message_added['messages'][0]['id']
+#     # message_added = next((d for d in history_record['history'] if 'messagesAdded' in d), None)
+
+
+
+#     email_message = gmail_service.users().messages().get(userId='me', id=message_id).execute()
+#     subject_dict = next((d for d in email_message['payload']['headers'] if d.get('name') == 'Subject'), None)
+#     print(subject_dict)
+#     # Next: fetch data for this id if message == SBD...
+
+def get_gmail_from_pub_sub_body(history_id):
 
     """
     Takes a historyId from a Gmail Pub/Sub subscription and fetchs the email that triggered the event
     by looking at the messagesAdded event. 
     """
+    
     # Fetch the history record using the history ID
     history_record = gmail_service.users().history().list(userId='me', startHistoryId=history_id).execute()
 
-    print(history_record)
     # print(history_record['history'])
-    message_added = next((d for d in history_record['history'] if 'messagesAdded' in d), None)
-    print('MESSAGE ADDED', message_added['messages'][0]['id'])
-    message_id = message_added['messages'][0]['id']
+    # message_added = next((d for d in history_record['history'] if 'messagesAdded' in d), None)
+    # message_id = message_added['messages'][0]['id']
+
+    if 'history' in history_record:
+        message_id = history_record['history'][0]['messages'][0]['id']
+        
     email_message = gmail_service.users().messages().get(userId='me', id=message_id).execute()
     subject_dict = next((d for d in email_message['payload']['headers'] if d.get('name') == 'Subject'), None)
-    print(subject_dict)
-    # Next: fetch data for this id if message == SBD...
 
-            
-get_email_from_pub_sub_body('5928151')
+    return email_message, subject_dict, message_id
+
+email_message, subject_dict, message_id = get_gmail_from_pub_sub_body('5928576')   
+
+print(email_message)
+print(subject_dict['value'])
+print(message_id)
+
+
+
+
+
+
 # data_string_from_pub_sub = 'eyJlbWFpbEFkZHJlc3MiOiJpcmlkaXVtZGF0YUBjcnlvc3BoZXJlaW5ub3ZhdGlvbi5jb20iLCJoaXN0b3J5SWQiOjU5MjIyODh9'
 # decoded_data_string = base64.b64decode(data_string_from_pub_sub).decode('utf-8')
 
