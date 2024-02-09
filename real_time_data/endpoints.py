@@ -168,6 +168,7 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
             # print(request.META)
             try:
                 print('YOU MADE IT HERE 1')
+                print(request.data)
                 data = json.loads(request.data)
                 print(data)
             except Exception as e:
