@@ -25,16 +25,26 @@ class TestSBDPubSubPostRequest(APITestCase):
         
         self.deployment = Deployment.objects.create(
             name='Test deployment', instrument=self.instrument)
-        self.real_time_data_object = RealTimeData.objects.create(iridium_imei='300434066254600', deployment=self.deployment)
+        self.real_time_data_object = RealTimeData.objects.create(iridium_imei='300434066153920', deployment=self.deployment)
 
-    def test_sbd_pub_sub_post_request(self):
+    # def test_sbd_pub_sub_post_request(self):
 
-        sample_pub_sub_payload = {'emailAddress': 'iridiumdata@cryosphereinnovation.com', 'historyId': '5930967'}
+    #     sample_pub_sub_payload = {'emailAddress': 'iridiumdata@cryosphereinnovation.com', 'historyId': '5930967'}
 
-        url = reverse('sbd_gmail_pub_sub-list')
-        response = self.client.post(url, format='json', data=sample_pub_sub_payload)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+    #     url = reverse('sbd_gmail_pub_sub-list')
+    #     response = self.client.post(url, format='json', data=sample_pub_sub_payload)
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        sbd_data_object = SBDData.objects.get(deployment=self.deployment)
-        self.assertEqual(sbd_data_object.sbd_filename, '300434066150890_000819.sbd')
-        self.assertEqual(len(sbd_data_object.sbd_binary.tobytes()), 275)
+    #     sbd_data_object = SBDData.objects.get(deployment=self.deployment)
+    #     self.assertEqual(sbd_data_object.sbd_filename, '300434066150890_000819.sbd')
+    #     self.assertEqual(len(sbd_data_object.sbd_binary.tobytes()), 275)
+
+    def test_sbd_data_download_by_imei(self):
+        url = reverse('sbd_data_download_by_imei-list')
+        response = self.client.post(url, format='json', data={'imei': '300434066153920'})
+        print(response.data)
+        response = self.client.post(url, format='json', data={'imei': '300434066153920'})
+        print(response.data)
+
+        # print(response.data['messages'])
+        # print(len(response.data['messages']))

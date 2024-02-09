@@ -8,6 +8,7 @@ from rest_framework.permissions import (AllowAny, BasePermission, IsAdminUser,
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from django.db import transaction
 from django.http import JsonResponse
 import json
 import base64
@@ -116,6 +117,7 @@ def get_gmail_from_pub_sub_body(history_id):
     by looking at the messagesAdded event. 
     """
 
+    # delay necessary to wait for Gmail to land after Pub/Sub request
     time.sleep(5)
     
     # Fetch the history record using the history ID
@@ -131,6 +133,13 @@ def get_gmail_from_pub_sub_body(history_id):
 
     return email_message, subject_dict, message_id
     # Next: fetch data for this id if message == SBD...
+
+
+def get_recent_gmails():
+    search_query = 'newer_than:1m'
+    response = gmail_service.users().messages().list(userId='me', q=search_query).execute()
+    return response
+
 
 def get_binary_message_attachment(msg_id):
     
@@ -159,72 +168,226 @@ def get_binary_message_attachment(msg_id):
             
     except errors.HttpError as error:
         print('An error occurred: %s' % error)
+        return None
 
+def get_gmail_from_message_id(message_id):
+
+    """
+    Takes a valid Gmail message_id and fetchs the full email, subject, and attachement
+    """
+
+    try:
+        email_message = gmail_service.users().messages().get(userId='me', id=message_id).execute()
+        subject = next((d for d in email_message['payload']['headers'] if d.get('name') == 'Subject'), None)
+
+        if subject and len(subject['value']) >= 18 and subject['value'][:18] == 'SBD Msg From Unit:':
+            # SBD message found
+            binary_message_object, file_name = get_binary_message_attachment(message_id)
+            imei = file_name[:15]
+            return binary_message_object, file_name, imei
+    except:
+        print('There was a problem fetching the gmail')
+        return None
+
+
+def create_sbd_data_entry_from_gmail_and_deployment(binary_message_object, file_name, deployment):
+    try:
+        with transaction.atomic():
+            sbd_data_object = SBDData(deployment=deployment, sbd_filename=file_name, sbd_binary=binary_message_object.getvalue())
+            sbd_data_object.save()
+            return True 
+    except Exception as e:
+        print("Error occurred while saving SBD data entry:", e)
+        return False
+
+        
+
+
+# class SBDGmailPubSubEndpoint(viewsets.ViewSet):
+
+#     def create(self, request):
+
+#         """
+#         Takes a POST request from the Gmail Pub/Sub and extracts the email that caused the 
+#         Pub/Sub trigger. 
+
+#         Note: this endpoint must return an OK (~200) status code or the Gmail Pub/Sub endpoint
+#         will continue to retry. 
+
+#         Written 8 Feb 2024
+#         """
+
+#         print('INSIDE GMAIL PUB SUB ENDPOINT')
+
+#         try:
+#             if not request.content_type or request.content_type == '':
+#                     request.META['CONTENT_TYPE'] = 'application/json'
+            
+#             print(request.data)
+#             pub_sub_history_id = request.data['historyId']
+#             email, subject, message_id = get_gmail_from_pub_sub_body(pub_sub_history_id)
+
+#             print('EMAIL: ', email)
+#             print('SUBJECT ', subject)
+            
+#             if subject and len(subject['value']) >= 18 and subject['value'][:18] == 'SBD Msg From Unit:':
+#                 print('SBD MESSAGE RECEIVED')
+#                 # message is (likely) from Iridium (note: only checking the subject, not the sender)
+#                 binary_message_object, file_name = get_binary_message_attachment(message_id)
+#                 imei = file_name[:15]
+#                 print(imei)
+
+#                 # Take the first RTD object if there are multiple for an IMEI
+#                 real_time_data_object = RealTimeData.objects.filter(iridium_imei=imei).first()
+
+#                 # extract binary file if it exists
+#                 # associate an active Real-time data object
+#                 # decode using Lambda function
+#                 # store file on S3 and in database
+#                 # post to mongodb
+#                 if binary_message_object:
+#                     print('BINARY MESSAGE FOUND:')
+#                     print(binary_message_object)
+#                     if real_time_data_object:
+#                         print('Real time data object found for this IMEI:')
+#                         try:
+#                             sbd_data_object = SBDData(deployment=real_time_data_object.deployment, sbd_filename=file_name, sbd_binary=binary_message_object.getvalue())
+#                             sbd_data_object.save()
+#                             # sample = SBDData.objects.get(deployment=real_time_data_object.deployment)
+#                             # print(sample.deployment)
+#                             # # print(sample.sbd_binary.tobytes())
+
+#                             # byte_data = sample.sbd_binary.tobytes()
+#                             # for byte in byte_data:
+#                             #     print('{:02x}'.format(byte))
+
+#                             # print(sample.sbd_filename)
+#                         except Exception as e:
+#                             print(e)
+
+#                 return JsonResponse({'subject': subject, 'email': email}, status=200)
+#             else:
+#                 return Response({}, status=200)
+#         except Exception as e:
+#             print('Error, likely no message ID found: ', e)
+#             return Response({}, status=200)
+    
 class SBDGmailPubSubEndpoint(viewsets.ViewSet):
 
     def create(self, request):
 
         """
-        Takes a POST request from the Gmail Pub/Sub and extracts the email that caused the 
-        Pub/Sub trigger. 
-
-        Note: this endpoint must return an OK (~200) status code or the Gmail Pub/Sub endpoint
-        will continue to retry. 
 
         Written 8 Feb 2024
         """
 
-        print('INSIDE GMAIL PUB SUB ENDPOINT')
+        print('INSIDE NEW GMAIL PUB SUB ENDPOINT')
 
-        try:
-            if not request.content_type or request.content_type == '':
-                    request.META['CONTENT_TYPE'] = 'application/json'
+        if not request.content_type or request.content_type == '':
+                request.META['CONTENT_TYPE'] = 'application/json'
+        
+        print(request.data)
+        # pub_sub_history_id = request.data['historyId']
+
+        # email, subject, message_id = get_gmail_from_pub_sub_body(pub_sub_history_id)
+
+        email_list_less_than_1_min_ago = get_recent_gmails()
+        print('EMAIL LIST FROM LESS THAN 1 MIN AGO: ', email_list_less_than_1_min_ago)
+
+        return Response({}, status=200)
+
+            # binary_message_object, file_name, imei = get_gmail_from_message_id()
             
-            print(request.data)
-            pub_sub_history_id = request.data['historyId']
-            email, subject, message_id = get_gmail_from_pub_sub_body(pub_sub_history_id)
+        #     if subject and len(subject['value']) >= 18 and subject['value'][:18] == 'SBD Msg From Unit:':
+        #         print('SBD MESSAGE RECEIVED')
+        #         # message is (likely) from Iridium (note: only checking the subject, not the sender)
+        #         binary_message_object, file_name = get_binary_message_attachment(message_id)
+        #         imei = file_name[:15]
+        #         print(imei)
 
-            print('EMAIL: ', email)
-            print('SUBJECT ', subject)
+        #         # Take the first RTD object if there are multiple for an IMEI
+        #         real_time_data_object = RealTimeData.objects.filter(iridium_imei=imei).first()
+
+        #         # extract binary file if it exists
+        #         # associate an active Real-time data object
+        #         # decode using Lambda function
+        #         # store file on S3 and in database
+        #         # post to mongodb
+        #         if binary_message_object:
+        #             print('BINARY MESSAGE FOUND:')
+        #             print(binary_message_object)
+        #             if real_time_data_object:
+        #                 print('Real time data object found for this IMEI:')
+        #                 try:
+        #                     sbd_data_object = SBDData(deployment=real_time_data_object.deployment, sbd_filename=file_name, sbd_binary=binary_message_object.getvalue())
+        #                     sbd_data_object.save()
+        #                     # sample = SBDData.objects.get(deployment=real_time_data_object.deployment)
+        #                     # print(sample.deployment)
+        #                     # # print(sample.sbd_binary.tobytes())
+
+        #                     # byte_data = sample.sbd_binary.tobytes()
+        #                     # for byte in byte_data:
+        #                     #     print('{:02x}'.format(byte))
+
+        #                     # print(sample.sbd_filename)
+        #                 except Exception as e:
+        #                     print(e)
+
+        #         return JsonResponse({'subject': subject, 'email': email}, status=200)
+        #     else:
+        #         return Response({}, status=200)
+        # except Exception as e:
+        #     print('Error, likely no message ID found: ', e)
+        #     return Response({}, status=200)
+        
+
+class SBDDataDownloadEndpoint(viewsets.ViewSet):
+
+    """
+    - Takes an IMEI in a POST request
+    - Checks if its registered for Real-Time Data
+    - If it is, it gets all the messages in the Gmail inbox that match the IMEI
+    - Then it downloads the emails and creates an SBDdata entry for each file
+    - Returns the number of saved SBDData entries
+    """
+
+    def create(self, request):
+
+        imei = request.data['imei']
+        real_time_data_object = RealTimeData.objects.filter(iridium_imei=imei).first()
+
+        if real_time_data_object:
+            try:
+                subject = 'subject: sbd msg from unit: {}'.format(request.data['imei'])
+                response = gmail_service.users().messages().list(
+                    userId='me', maxResults=500, q=subject).execute()
+
+                messages = []
+                if 'messages' in response:
+                    messages.extend(response['messages'])
+
+                while 'nextPageToken' in response:
+                    page_token = response['nextPageToken']
+                    response = gmail_service.users().messages().list(userId='me', maxResults=500,
+                                                            q=subject, pageToken=page_token).execute()
+                    if 'messages' in response:
+                        messages.extend(response['messages'])
             
-            if subject and len(subject['value']) >= 18 and subject['value'][:18] == 'SBD Msg From Unit:':
-                print('SBD MESSAGE RECEIVED')
-                # message is (likely) from Iridium (note: only checking the subject, not the sender)
-                binary_message_object, file_name = get_binary_message_attachment(message_id)
-                imei = file_name[:15]
-                print(imei)
+            except Exception as e:
+                print('There was a problem downloading messages')
+                return Response({})
+        else:
+            return Response({'Real-time data isnt set up for this IMEI'})
+        
+        saved_entries = 0
+        print('MESSAGES LENGTH: ', messages)
 
-                # Take the first RTD object if there are multiple for an IMEI
-                real_time_data_object = RealTimeData.objects.filter(iridium_imei=imei).first()
+        for message in messages:
+            binary_message_object, file_name, imei = get_gmail_from_message_id(message['id'])
+            print(file_name)
+            save_successful = create_sbd_data_entry_from_gmail_and_deployment(binary_message_object, file_name, real_time_data_object.deployment)
 
-                # extract binary file if it exists
-                # associate an active Real-time data object
-                # decode using Lambda function
-                # store file on S3 and in database
-                # post to mongodb
-                if binary_message_object:
-                    print('BINARY MESSAGE FOUND:')
-                    print(binary_message_object)
-                    if real_time_data_object:
-                        print('Real time data object found for this IMEI:')
-                        try:
-                            sbd_data_object = SBDData(deployment=real_time_data_object.deployment, sbd_filename=file_name, sbd_binary=binary_message_object.getvalue())
-                            sbd_data_object.save()
-                            # sample = SBDData.objects.get(deployment=real_time_data_object.deployment)
-                            # print(sample.deployment)
-                            # # print(sample.sbd_binary.tobytes())
-
-                            # byte_data = sample.sbd_binary.tobytes()
-                            # for byte in byte_data:
-                            #     print('{:02x}'.format(byte))
-
-                            # print(sample.sbd_filename)
-                        except Exception as e:
-                            print(e)
-
-                return JsonResponse({'subject': subject, 'email': email}, status=200)
-            else:
-                return Response({}, status=200)
-        except Exception as e:
-            print('Error, likely no message ID found: ', e)
-            return Response({}, status=200)
+            if save_successful:
+                saved_entries = saved_entries + 1
+        
+        return Response({'saved_entries': saved_entries})

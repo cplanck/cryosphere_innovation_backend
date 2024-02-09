@@ -8,6 +8,9 @@ router = routers.DefaultRouter()
 router.register('sbd_gmail_pub_sub', SBDGmailPubSubEndpoint,
                 basename='sbd_gmail_pub_sub')
 
+router.register('sbd_data_download_by_imei', SBDDataDownloadEndpoint,
+                basename='sbd_data_download_by_imei')
+
 router.register('decode-scripts/preview', DecodeScriptPreviewEndpoint,
                 basename='sbd_message_preview')
 
