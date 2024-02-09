@@ -162,13 +162,17 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
 
         Written 8 Feb 2024
         """
+
+        print('INSIDE GMAIL PUB SUB ENDPOINT')
+        print(request.content_type)
+
         if not request.content_type or request.content_type == '':
                 request.content_type = 'application/json'
         try:
             data = request.json()  # Parse the JSON payload
         except Exception as e:
             print(e)
-            
+
         try:
             print('YOU MADE IT HERE 1')
             print(request)
