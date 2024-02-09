@@ -184,7 +184,6 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
             print("Request Headers:", dict(request.headers))
             
         finally:
-            print(e)
             print('YOU MADE IT HERE 3')
             print(type(request.data))
 
