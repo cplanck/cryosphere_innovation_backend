@@ -30,13 +30,16 @@ import collections
 from instruments.base_models import InstrumentSensorPackage
 from .models import RealTimeData, DecodeScript
 from .serializers import (RealTimeDataSerializer, RealTimeDataPOSTSerializer, DecodeScriptSerializer)
-
-from pathlib import Path
-THIS_FOLDER = Path(__file__).parent.resolve()
-SERVICE_ACCOUNT_FILE = THIS_FOLDER / "gmail_service_account_token.json"
+import os
 
 GMAIL_SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
-SERVICE_ACCOUNT_FILE = 'gmail_service_account_token.json'
+
+
+if os.getenv('WEBSITE_ROOT') == 'http://localhost:8000':
+    SERVICE_ACCOUNT_FILE = 'gmail_service_account_token.json'
+else:
+    SERVICE_ACCOUNT_FILE = '/home/cplanck/cryosphere_innovation_backend/gmail_service_account_token.json'
+
 DELEGATE = 'iridiumdata@cryosphereinnovation.com'
 
 gmail_creds = service_account.Credentials.from_service_account_file(
