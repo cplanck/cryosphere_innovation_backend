@@ -162,31 +162,28 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
 
         Written 8 Feb 2024
         """
+       
         try:
-            print('IS THIS RUNNING AT ALL?')
-            print(request)
-            # print(request.META)
-            try:
-                print('YOU MADE IT HERE 1')
-                print(request.data)
-                data = json.loads(request.data)
-                print(data)
-            except Exception as e:
-                print('YOU MADE IT HERE 2')
-                print(e)
-            finally:
-                print('YOU MADE IT HERE 3')
-                print(type(request.data))
-
-
+            print('YOU MADE IT HERE 1')
+            data = json.loads(request.data)
             print(data)
-            print(str(request.data))
-            print(request.data)
-            print(type(request.data))
-            pub_sub_message_body = base64.b64decode(request.data['body'].encode("utf-8"))
-            print('PUB SUB MESSAGE BODY', pub_sub_message_body)
         except Exception as e:
+            print('YOU MADE IT HERE 2')
             print(e)
+        finally:
+            print('YOU MADE IT HERE 3')
+            print(type(request.data))
+
+
+
+
+        print(data)
+        print(str(request.data))
+        print(request.data)
+        print(type(request.data))
+        pub_sub_message_body = base64.b64decode(request.data['body'].encode("utf-8"))
+        print('PUB SUB MESSAGE BODY', pub_sub_message_body)
+       
 
         pub_sub_history_id = pub_sub_message_body['historyId']
         print('PUB SUB HISTORY ID', pub_sub_history_id)
