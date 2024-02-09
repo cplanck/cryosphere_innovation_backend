@@ -118,6 +118,8 @@ def get_gmail_from_pub_sub_body(history_id):
     # Fetch the history record using the history ID
     history_record = gmail_service.users().history().list(userId='me', startHistoryId=history_id).execute()
 
+    print(history_record)
+
     if 'history' in history_record:
         message_id = history_record['history'][0]['messages'][0]['id']
 
@@ -188,6 +190,8 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
                 binary_message_object, file_name = get_binary_message_attachment(message_id)
                 imei = file_name[:15]
                 print(imei)
+
+                # Take the first RTD object if there are multiple for an IMEI
                 real_time_data_object = RealTimeData.objects.filter(iridium_imei=imei).first()
 
                 # extract binary file if it exists
