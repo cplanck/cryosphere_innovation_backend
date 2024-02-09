@@ -168,9 +168,7 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
 
         if not request.content_type or request.content_type == '':
                 request.META['CONTENT_TYPE'] = 'application/json'
-     
-        print('REQUEST DATA: ', request.data)
-        
+             
         pub_sub_history_id = request.data['historyId']
         print('PUB SUB HISTORY ID', pub_sub_history_id)
 
@@ -178,7 +176,8 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
         print('GMAIL RECEIVED, EMAIL: ', email)
         print('GMAIL RECEIVED, SUBJECT: ', subject)
         
-        if subject['value'][:18] == 'SBD Msg From Unit:':
+        if subject['value'][:17] == 'SBD Msg From Unit:':
+            print('SBD MESSAGE RECEIVED')
             # message is (likely) from Iridium (note: only checking the subject, not the sender)
             binary_message_object, file_name = get_binary_message_attachment(message_id)
             imei = file_name[:15]
@@ -187,7 +186,8 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
             # decode using Lambda function
             # store file on S3 and in database
             # post to mongodb
-            print(binary_message_object)
+            if binary_message_object:
+                print(binary_message_object)
             print(subject)
             print(imei)
             return JsonResponse({'subject': subject, 'email': email})
