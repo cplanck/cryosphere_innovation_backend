@@ -288,6 +288,10 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
     def create(self, request):
 
         """
+        Endpoint attached to the Gmail Pub/Sub push endpoint. 
+        Gmail doesnt cake in email data to the pub/sub endpoint, so we 
+        simply poll the inbox and loop through all messages that arrived in 
+        the last 5 seconds when theres a notification of a change.
 
         Written 8 Feb 2024
         """
@@ -302,7 +306,7 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
 
         # email, subject, message_id = get_gmail_from_pub_sub_body(pub_sub_history_id)
 
-        email_list_less_than_1_min_ago = get_recent_gmails(5)
+        email_list_less_than_1_min_ago = get_recent_gmails(30)
         print('EMAIL LIST FROM LESS THAN 5 SECOND AGO: ')
 
         print(email_list_less_than_1_min_ago)
@@ -315,8 +319,7 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
                     if real_time_data_object:
                         print('REAL TIME DATA OBJECT FOUND')
                         sbd_data_object = SBDData(deployment=real_time_data_object.deployment, sbd_filename=file_name, sbd_binary=binary_message_object.getvalue())
-                        sbd_data_object.save()
-                        
+                        sbd_data_object.save()   
                     print(file_name)
                     print(imei)
                 except Exception as e:
