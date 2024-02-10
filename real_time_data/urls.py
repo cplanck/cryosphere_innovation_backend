@@ -11,6 +11,9 @@ router.register('sbd_gmail_pub_sub', SBDGmailPubSubEndpoint,
 router.register('sbd_data_download_by_imei', SBDDataDownloadEndpoint,
                 basename='sbd_data_download_by_imei')
 
+router.register('decode-sbd-binary', SBDDecodeBinary,
+                basename='decode_sbd_binary')
+
 router.register('decode-scripts/preview', DecodeScriptPreviewEndpoint,
                 basename='sbd_message_preview')
 

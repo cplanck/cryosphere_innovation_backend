@@ -22,6 +22,7 @@ from google.auth.transport.requests import Request
 from google.oauth2 import service_account
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
+from data.mongodb import *
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 import base64
@@ -397,9 +398,10 @@ class SBDDataDownloadEndpoint(viewsets.ViewSet):
 
         if real_time_data_object:
             try:
-                subject = 'subject: sbd msg from unit: {}'.format(request.data['imei'])
+                subject = 'subject: SBD Msg From Unit: {}'.format(request.data['imei'])
+                query = f'{subject}"'
                 response = gmail_service.users().messages().list(
-                    userId='me', maxResults=500, q=subject).execute()
+                    userId='me', maxResults=500, q=query).execute()
 
                 messages = []
                 if 'messages' in response:
@@ -419,14 +421,89 @@ class SBDDataDownloadEndpoint(viewsets.ViewSet):
             return Response({'Real-time data isnt set up for this IMEI'})
         
         saved_entries = 0
-        print('MESSAGES LENGTH: ', messages)
+        print('MESSAGES LENGTH: ', len(messages))
 
-        for message in messages:
-            binary_message_object, file_name, imei = get_gmail_from_message_id(message['id'])
-            print(file_name)
-            save_successful = create_sbd_data_entry_from_gmail_and_deployment(binary_message_object, file_name, real_time_data_object.deployment)
+        if messages:
+            most_recent_message = messages[0]
+            binary_message_object, file_name, imei = get_gmail_from_message_id(most_recent_message['id'])
 
-            if save_successful:
-                saved_entries = saved_entries + 1
+            momsn = int(file_name[16:].lstrip('0')[:-4])
+            
+            list_of_all_sbd_files = []
+            for i in range(momsn, -1, -1):
+                formatted_number = f"{i:04d}"  # Format with leading zeros to ensure 6 characters
+                list_of_all_sbd_files.append(f"{imei}_00{formatted_number}.sbd")
+
+            # pull a list of filenames in SBD data
+            already_downloaded_sbd_files = list(SBDData.objects.filter(deployment=real_time_data_object.deployment).values_list('sbd_filename', flat=True))
+            filenames_left_to_download = [item for item in list_of_all_sbd_files if item not in already_downloaded_sbd_files]
+            momsn_list = [int(file_name[16:].lstrip('0')[:-4]) if file_name[16:].lstrip('0')[:-4] else 0 for file_name in filenames_left_to_download]
+            
+            print(momsn_list)
+            messages = []
+            for momsn in momsn_list:
+                subject = 'subject: SBD Msg From Unit: {}'.format(request.data['imei'])
+                print(subject)
+                query = f'{subject} AND "MOMSN: {momsn}"'
+                response = gmail_service.users().messages().list(
+                    userId='me', maxResults=500, q=query).execute()
+
+                if 'messages' in response:
+                    messages.extend(response['messages'])
+
+                while 'nextPageToken' in response:
+                    page_token = response['nextPageToken']
+                    response = gmail_service.users().messages().list(userId='me', maxResults=500,
+                                                            q=subject, pageToken=page_token).execute()
+                    if 'messages' in response:
+                        messages.extend(response['messages'])
+                
+            if messages:
+                print('Downloading SBD messages...')
+                for message in messages:
+                    print(file_name)
+                    binary_message_object, file_name, imei = get_gmail_from_message_id(message['id'])
+                    create_sbd_data_entry_from_gmail_and_deployment(binary_message_object, file_name, real_time_data_object.deployment)
+                    saved_entries = saved_entries + 1
+            else:
+                print('All caught up!')
         
         return Response({'saved_entries': saved_entries})
+    
+
+class SBDDecodeBinary(viewsets.ViewSet):
+
+    """
+    For now, lets take an RTD ID and pull data, decode, and POST to the DB. 
+    """
+
+    def create(self, request):
+        print('NEW DECODE STARTING')
+        id = request.data['id']
+        RTD_object = RealTimeData.objects.get(id=id)
+        RTD_object.decoding = True
+        RTD_object.save()
+
+        deployment = RTD_object.deployment
+        sbd_files_list = list(SBDData.objects.filter(deployment=deployment).values_list('sbd_binary', flat=True))
+        # print(len(sbd_files_list))
+        lambda_url = 'https://aid6pluilxmnmikbpkya6yhw4a0klpim.lambda-url.us-east-1.on.aws/'
+        for sbd_file in sbd_files_list:
+            try:
+                # print(sbd_binary_file)
+                r = requests.post(lambda_url, json={ 'message_decode_test': True, 'rebase': False, 'decode_script_id': RTD_object.decode_script.id, 'message': base64.b64encode(sbd_file).decode()})   
+                # print(r.json()['decoded_message'])
+                # print(deployment.data_uuid)
+                post_data_to_mongodb_collection(str(deployment.data_uuid), [r.json()['decoded_message']])
+                # print('THIS RAN')
+            except Exception as e:
+                print('ERROR: ', e)
+        
+        RTD_object.decoding=False
+        RTD_object.updated= datetime.datetime.utcnow().isoformat()
+        RTD_object.save()
+
+        return Response({})
+            
+        # print(RTD_object.decode_script)
+
