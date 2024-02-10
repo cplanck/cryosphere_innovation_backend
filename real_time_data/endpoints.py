@@ -312,7 +312,7 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
         # time.sleep(5)
                 
         try:
-            recent_email_list = get_recent_gmails(30)
+            recent_email_list = get_recent_gmails(120)
         except Exception as e:
             # if no recent messages are found, return a 400 so Pub/Sub tries again
             return Response('No message found', status=400)
@@ -490,10 +490,8 @@ class SBDDecodeBinary(viewsets.ViewSet):
         lambda_url = 'https://aid6pluilxmnmikbpkya6yhw4a0klpim.lambda-url.us-east-1.on.aws/'
         for sbd_file in sbd_files_list:
             try:
-                # print(sbd_binary_file)
                 r = requests.post(lambda_url, json={ 'message_decode_test': True, 'rebase': False, 'decode_script_id': RTD_object.decode_script.id, 'message': base64.b64encode(sbd_file).decode()})   
-                # print(r.json()['decoded_message'])
-                # print(deployment.data_uuid)
+                
                 post_data_to_mongodb_collection(str(deployment.data_uuid), [r.json()['decoded_message']])
                 # print('THIS RAN')
             except Exception as e:
