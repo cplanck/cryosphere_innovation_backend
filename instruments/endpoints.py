@@ -179,7 +179,6 @@ class DeploymentDataEndpoint(viewsets.ViewSet):
             print(response)
             return Response(response, status=status.HTTP_201_CREATED)
         except Exception as e:
-            print('THIS EXCEPTION RAN')
             print(e)
             return Response({'There was a problem adding data to the database.'}, status=status.HTTP_400_BAD_REQUEST)
 
