@@ -241,3 +241,35 @@ class PredictSensorFields(viewsets.ViewSet):
         print(completion.choices[0].message.content)
         return JsonResponse({'prediction': completion.choices[0].message.content}, status=status.HTTP_200_OK)
 
+
+class AddUniqueIDtoDeploymentMongoDB(viewsets.ViewSet):
+
+    """
+    Temporary endpoint for programmatically adding unique indexes
+    on MongoDB collections that were created without them. 
+
+    Written 10 Feb 2024
+    """
+    authentication_classes = [CookieTokenAuthentication]
+
+    def create(self, request):
+        data_uuid = request.data['data_uuid']
+        unique_index = request.data['unique_index']
+        deployment = Deployment.objects.get(data_uuid=data_uuid)
+        if deployment:
+            try:
+                r = add_unique_index_to_mongodb_collection(str(deployment.data_uuid), unique_index)
+                if r['status']:
+                    print(unique_index)
+                    deployment.unique_index=unique_index
+                    deployment.save()
+                    return JsonResponse({'status': True, 'message': f'unique index {unique_index} added'}, status=200)
+                else:
+                    print(r['message'])
+                    return JsonResponse({'status': False, 'message': f'Error: {r["message"]}'}, status=400)
+
+            except Exception as e:
+                print(e)
+                return JsonResponse({'status': False, 'message': f'Error: {str(e)}'}, status=400)
+        else:
+            return JsonResponse({'status': f'no deployment found'}, status=400)

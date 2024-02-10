@@ -21,6 +21,8 @@ router.register('sensors/predict', PredictSensorFields,
                 basename='predict_sensor_fields')
 router.register('sensors', InstrumentSensorPackageEndpoint,
                 basename='instrument_sensor_package')
+router.register('add-unique-index', AddUniqueIDtoDeploymentMongoDB,
+                basename='add_unique_index')
 
 # User endpoints
 # For the frontend user defined instruments/deployments

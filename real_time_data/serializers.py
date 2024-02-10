@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import RealTimeData, DecodeScript
+from .models import RealTimeData, DecodeScript, SBDData
 
 class RealTimeDataSerializer(serializers.ModelSerializer):
     class Meta:
@@ -16,3 +16,8 @@ class DecodeScriptSerializer(serializers.ModelSerializer):
     class Meta:
         model = DecodeScript
         fields = '__all__'
+
+class GetSBDDetailsByDeploymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SBDData
+        fields = ['sbd_filename', 'last_modified']

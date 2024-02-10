@@ -14,6 +14,9 @@ router.register('sbd_data_download_by_imei', SBDDataDownloadEndpoint,
 router.register('decode-sbd-binary', SBDDecodeBinary,
                 basename='decode_sbd_binary')
 
+router.register('sbd-details', GetSBDDetailsByDeployment,
+                basename='sbd-details')
+
 router.register('decode-scripts/preview', DecodeScriptPreviewEndpoint,
                 basename='sbd_message_preview')
 

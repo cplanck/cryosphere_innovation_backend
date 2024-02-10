@@ -32,7 +32,7 @@ from .binaryreader import *
 import collections
 from instruments.base_models import InstrumentSensorPackage
 from .models import RealTimeData, DecodeScript
-from .serializers import (RealTimeDataSerializer, RealTimeDataPOSTSerializer, DecodeScriptSerializer)
+from .serializers import (RealTimeDataSerializer, RealTimeDataPOSTSerializer, DecodeScriptSerializer, GetSBDDetailsByDeploymentSerializer)
 from django.http.request import QueryDict
 import os
 from real_time_data.models import *
@@ -328,6 +328,18 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
                         print('REAL TIME DATA OBJECT FOUND')
                         sbd_data_object = SBDData(deployment=real_time_data_object.deployment, sbd_filename=file_name, sbd_binary=binary_message_object.getvalue())
                         sbd_data_object.save()   
+
+                        try:
+                            lambda_url = 'https://aid6pluilxmnmikbpkya6yhw4a0klpim.lambda-url.us-east-1.on.aws/'
+                            r = requests.post(lambda_url, json={ 'message_decode_test': True, 'rebase': False, 'decode_script_id': real_time_data_object.decode_script.id, 'message': base64.b64encode(binary_message_object.getvalue()).decode()})  
+                            entry = r.json()['decoded_message']
+                            entry['filename'] = sbd_data_object.sbd_filename
+                            post_data_to_mongodb_collection(str(real_time_data_object.deployment.data_uuid), [entry])
+                            print('POSTED TO MONGO DB')
+                        except Exception as e:
+                            print('THERE WAS A PROBLEM POSTING DATA TO MONGO DB')
+                            print(e)
+
                     print(file_name)
                     print(imei)
                 except Exception as e:
@@ -380,6 +392,25 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
         #     print('Error, likely no message ID found: ', e)
         #     return Response({}, status=200)
         
+
+class GetSBDDetailsByDeployment(viewsets.ModelViewSet):
+
+    """
+    Retreive details from the SBD model for a given deployment.
+    Returns a sbd_filename and last_modified
+
+    Accepts GET requests
+    Written 10 Feb 2024
+    """
+
+    serializer_class = GetSBDDetailsByDeploymentSerializer
+    http_method_names = ['get']
+    
+    def get_queryset(self):
+        deployment = self.request.GET.get('deployment')
+        queryset = SBDData.objects.filter(deployment=deployment).order_by('last_modified')
+        return queryset
+
 
 class SBDDataDownloadEndpoint(viewsets.ViewSet):
 
@@ -485,14 +516,16 @@ class SBDDecodeBinary(viewsets.ViewSet):
         RTD_object.save()
 
         deployment = RTD_object.deployment
-        sbd_files_list = list(SBDData.objects.filter(deployment=deployment).values_list('sbd_binary', flat=True))
-        # print(len(sbd_files_list))
+        sbd_files_list = list(SBDData.objects.filter(deployment=deployment).values_list('sbd_binary', 'sbd_filename'))
+        print(sbd_files_list)
         lambda_url = 'https://aid6pluilxmnmikbpkya6yhw4a0klpim.lambda-url.us-east-1.on.aws/'
         for sbd_file in sbd_files_list:
             try:
-                r = requests.post(lambda_url, json={ 'message_decode_test': True, 'rebase': False, 'decode_script_id': RTD_object.decode_script.id, 'message': base64.b64encode(sbd_file).decode()})   
-                
-                post_data_to_mongodb_collection(str(deployment.data_uuid), [r.json()['decoded_message']])
+                print(sbd_file)
+                r = requests.post(lambda_url, json={ 'message_decode_test': True, 'rebase': False, 'decode_script_id': RTD_object.decode_script.id, 'message': base64.b64encode(sbd_file[0]).decode()})  
+                entry = r.json()['decoded_message']
+                entry['filename'] = sbd_file[1]
+                post_data_to_mongodb_collection(str(deployment.data_uuid), [entry])
                 # print('THIS RAN')
             except Exception as e:
                 print('ERROR: ', e)

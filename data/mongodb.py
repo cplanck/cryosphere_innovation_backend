@@ -3,7 +3,7 @@ from urllib import response
 
 from bson import ObjectId
 from dotenv import load_dotenv
-from pymongo.errors import BulkWriteError
+from pymongo.errors import BulkWriteError, DuplicateKeyError
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 
@@ -94,3 +94,12 @@ def delete_objects_from_mongo_db_collection_by_id(collection_name, object_id_arr
 def delete_all_data_from_mongodb_collection(collection_name):
     collection = db[collection_name]
     collection.delete_many({})
+
+def add_unique_index_to_mongodb_collection(collection_name, unique_index):
+    collection = db[collection_name]
+    # print(collection)
+    try:
+        collection.create_index(unique_index, unique=True)
+        return {'status': True, 'message': ''}
+    except DuplicateKeyError as e:
+        return {'status': False, 'message': e.details}
