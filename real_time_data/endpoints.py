@@ -65,14 +65,12 @@ class RealTimeDataEndpoint(viewsets.ModelViewSet):
     """
 
     authentication_classes = [CookieTokenAuthentication]
-    queryset = RealTimeData.objects.all().order_by('-last_modified')
+    queryset = RealTimeData.objects.all().order_by('-updated').order_by('-active')
     serializer_class = RealTimeDataSerializer
     filterset_fields = ['active']
 
     def get_serializer_class(self):
-        
         if self.request.method == 'GET':
-           
             return RealTimeDataSerializer
         else:
             return RealTimeDataPOSTSerializer
@@ -218,77 +216,6 @@ def create_sbd_data_entry_from_gmail_and_deployment(binary_message_object, file_
         print("Error occurred while saving SBD data entry:", e)
         return False
 
-        
-
-
-# class SBDGmailPubSubEndpoint(viewsets.ViewSet):
-
-#     def create(self, request):
-
-#         """
-#         Takes a POST request from the Gmail Pub/Sub and extracts the email that caused the 
-#         Pub/Sub trigger. 
-
-#         Note: this endpoint must return an OK (~200) status code or the Gmail Pub/Sub endpoint
-#         will continue to retry. 
-
-#         Written 8 Feb 2024
-#         """
-
-#         print('INSIDE GMAIL PUB SUB ENDPOINT')
-
-#         try:
-#             if not request.content_type or request.content_type == '':
-#                     request.META['CONTENT_TYPE'] = 'application/json'
-            
-#             print(request.data)
-#             pub_sub_history_id = request.data['historyId']
-#             email, subject, message_id = get_gmail_from_pub_sub_body(pub_sub_history_id)
-
-#             print('EMAIL: ', email)
-#             print('SUBJECT ', subject)
-            
-#             if subject and len(subject['value']) >= 18 and subject['value'][:18] == 'SBD Msg From Unit:':
-#                 print('SBD MESSAGE RECEIVED')
-#                 # message is (likely) from Iridium (note: only checking the subject, not the sender)
-#                 binary_message_object, file_name = get_binary_message_attachment(message_id)
-#                 imei = file_name[:15]
-#                 print(imei)
-
-#                 # Take the first RTD object if there are multiple for an IMEI
-#                 real_time_data_object = RealTimeData.objects.filter(iridium_imei=imei).first()
-
-#                 # extract binary file if it exists
-#                 # associate an active Real-time data object
-#                 # decode using Lambda function
-#                 # store file on S3 and in database
-#                 # post to mongodb
-#                 if binary_message_object:
-#                     print('BINARY MESSAGE FOUND:')
-#                     print(binary_message_object)
-#                     if real_time_data_object:
-#                         print('Real time data object found for this IMEI:')
-#                         try:
-#                             sbd_data_object = SBDData(deployment=real_time_data_object.deployment, sbd_filename=file_name, sbd_binary=binary_message_object.getvalue())
-#                             sbd_data_object.save()
-#                             # sample = SBDData.objects.get(deployment=real_time_data_object.deployment)
-#                             # print(sample.deployment)
-#                             # # print(sample.sbd_binary.tobytes())
-
-#                             # byte_data = sample.sbd_binary.tobytes()
-#                             # for byte in byte_data:
-#                             #     print('{:02x}'.format(byte))
-
-#                             # print(sample.sbd_filename)
-#                         except Exception as e:
-#                             print(e)
-
-#                 return JsonResponse({'subject': subject, 'email': email}, status=200)
-#             else:
-#                 return Response({}, status=200)
-#         except Exception as e:
-#             print('Error, likely no message ID found: ', e)
-#             return Response({}, status=200)
     
 class SBDGmailPubSubEndpoint(viewsets.ViewSet):
 
@@ -309,12 +236,12 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
                 request.META['CONTENT_TYPE'] = 'application/json'
                 
         try:
+            # Get all emails that landed in the last 120 seconds
             recent_email_list = get_recent_gmails(120)
         except Exception as e:
-            # if no recent messages are found, return a 400 so Pub/Sub tries again
+            # Ff no recent messages are found, return a 400 so Pub/Sub tries again
             return Response('No message found', status=400)
         
-        print(recent_email_list)
         if 'messages' in recent_email_list:
             for message in recent_email_list['messages']:
                 print(message['id'])
@@ -322,7 +249,6 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
                     binary_message_object, file_name, imei = get_gmail_from_message_id(message['id'])
                     real_time_data_object = RealTimeData.objects.filter(iridium_imei=imei).first()
                     if real_time_data_object and binary_message_object:
-                        print('REAL TIME DATA OBJECT FOUND')
                         sbd_data_object = SBDData(deployment=real_time_data_object.deployment, sbd_filename=file_name, sbd_binary=binary_message_object.getvalue(), gmail_message_id=message['id'])
                         sbd_data_object.save()   
                         try:
@@ -332,9 +258,13 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
                             entry['filename'] = sbd_data_object.sbd_filename
                             post_data_to_mongodb_collection(str(real_time_data_object.deployment.data_uuid), [entry])
                             print('POSTED TO MONGO DB')
+                            real_time_data_object.updated = datetime.datetime.utcnow().isoformat()
+                            real_time_data_object.save()
                         except Exception as e:
                             print('THERE WAS A PROBLEM POSTING DATA TO MONGO DB')
                             print(e)
+                            real_time_data_object.error = str(e)
+                            real_time_data_object.save()
 
                         # Need to add RTD object saving here with updated = datetime.now()
                     else:
@@ -345,70 +275,6 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
                     print('There was a problem retreiving the email or creating the SBD data object')
 
         return Response({}, status=200)
-
-            # binary_message_object, file_name, imei = get_gmail_from_message_id()
-            
-        #     if subject and len(subject['value']) >= 18 and subject['value'][:18] == 'SBD Msg From Unit:':
-        #         print('SBD MESSAGE RECEIVED')
-        #         # message is (likely) from Iridium (note: only checking the subject, not the sender)
-        #         binary_message_object, file_name = get_binary_message_attachment(message_id)
-        #         imei = file_name[:15]
-        #         print(imei)
-
-        #         # Take the first RTD object if there are multiple for an IMEI
-        #         real_time_data_object = RealTimeData.objects.filter(iridium_imei=imei).first()
-
-        #         # extract binary file if it exists
-        #         # associate an active Real-time data object
-        #         # decode using Lambda function
-        #         # store file on S3 and in database
-        #         # post to mongodb
-        #         if binary_message_object:
-        #             print('BINARY MESSAGE FOUND:')
-        #             print(binary_message_object)
-        #             if real_time_data_object:
-        #                 print('Real time data object found for this IMEI:')
-        #                 try:
-        #                     sbd_data_object = SBDData(deployment=real_time_data_object.deployment, sbd_filename=file_name, sbd_binary=binary_message_object.getvalue())
-        #                     sbd_data_object.save()
-        #                     # sample = SBDData.objects.get(deployment=real_time_data_object.deployment)
-        #                     # print(sample.deployment)
-        #                     # # print(sample.sbd_binary.tobytes())
-
-        #                     # byte_data = sample.sbd_binary.tobytes()
-        #                     # for byte in byte_data:
-        #                     #     print('{:02x}'.format(byte))
-
-        #                     # print(sample.sbd_filename)
-        #                 except Exception as e:
-        #                     print(e)
-
-        #         return JsonResponse({'subject': subject, 'email': email}, status=200)
-        #     else:
-        #         return Response({}, status=200)
-        # except Exception as e:
-        #     print('Error, likely no message ID found: ', e)
-        #     return Response({}, status=200)
-        
-
-class GetSBDDetailsByDeployment(viewsets.ModelViewSet):
-
-    """
-    Retreive details from the SBD model for a given deployment.
-    Returns a sbd_filename and last_modified
-
-    Accepts GET requests
-    Written 10 Feb 2024
-    """
-
-    serializer_class = GetSBDDetailsByDeploymentSerializer
-    http_method_names = ['get']
-    
-    def get_queryset(self):
-        deployment = self.request.GET.get('deployment')
-        queryset = SBDData.objects.filter(deployment=deployment).order_by('-sbd_filename')
-        return queryset
-
 
 class SBDDataDownloadEndpoint(viewsets.ViewSet):
 
@@ -491,33 +357,53 @@ class SBDDecodeBinary(viewsets.ViewSet):
 
     def create(self, request):
 
-        id = request.data['id']
-        RTD_object = RealTimeData.objects.get(id=id)
-        RTD_object.resyncing = True
-        RTD_object.save()
+        lambda_url = 'https://aid6pluilxmnmikbpkya6yhw4a0klpim.lambda-url.us-east-1.on.aws/'
 
-        deployment = RTD_object.deployment
+        id = request.data['id']
+
+        real_time_data_object = RealTimeData.objects.get(id=id)
+        real_time_data_object.resyncing = True
+        real_time_data_object.save()
+
+        deployment = real_time_data_object.deployment
         sbd_files_list = list(SBDData.objects.filter(deployment=deployment).order_by('-sbd_filename').values_list('sbd_binary', 'sbd_filename'))
         existing_files_in_collection = get_data_from_mongodb(str(deployment.data_uuid), ['filename'])
         existing_files_in_collection = [file['filename'] for file in existing_files_in_collection]
-        print(existing_files_in_collection)
-        print(existing_files_in_collection)
         files_to_post = [file for file in sbd_files_list if file[1] not in existing_files_in_collection ]
 
-        lambda_url = 'https://aid6pluilxmnmikbpkya6yhw4a0klpim.lambda-url.us-east-1.on.aws/'
         print(f'Resyncing {len(files_to_post)} files')
+        
+        resynced_files = 0
         for sbd_file in files_to_post:
             try:
-                r = requests.post(lambda_url, json={ 'message_decode_test': True, 'rebase': False, 'decode_script_id': RTD_object.decode_script.id, 'message': base64.b64encode(sbd_file[0]).decode()})  
+                r = requests.post(lambda_url, json={ 'message_decode_test': True, 'rebase': False, 'decode_script_id': real_time_data_object.decode_script.id, 'message': base64.b64encode(sbd_file[0]).decode()})  
                 entry = r.json()['decoded_message']
                 entry['filename'] = sbd_file[1]
                 post_data_to_mongodb_collection(str(deployment.data_uuid), [entry])
+                resynced_files = resynced_files +1
             except Exception as e:
                 print('ERROR: ', e)
         
-        RTD_object.resyncing=False
-        RTD_object.updated= datetime.datetime.utcnow().isoformat()
-        RTD_object.save()
+        real_time_data_object.resyncing=False
+        real_time_data_object.updated= datetime.datetime.utcnow().isoformat()
+        real_time_data_object.save()
 
-        return Response({})
+        return Response({'resynced_files': resynced_files})
             
+
+class GetSBDDetailsByDeployment(viewsets.ModelViewSet):
+
+    """
+    Retreive details from the SBD model for a given deployment.
+    Returns a sbd_filename and last_modified
+
+    Written 10 Feb 2024
+    """
+
+    serializer_class = GetSBDDetailsByDeploymentSerializer
+    http_method_names = ['get']
+    
+    def get_queryset(self):
+        deployment = self.request.GET.get('deployment')
+        queryset = SBDData.objects.filter(deployment=deployment).order_by('-sbd_filename')
+        return queryset

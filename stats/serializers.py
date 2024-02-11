@@ -10,7 +10,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = ['avatar']
 
     def get_avatar(self, obj):
-        print(obj)
         if obj.avatar:
             return obj.avatar.url
         if obj.google_avatar:
@@ -26,6 +25,7 @@ class UserSerializer(serializers.ModelSerializer):
 class DeploymentDownloadSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     avatar = serializers.SerializerMethodField()
+    deployment = serializers.SerializerMethodField()
 
     class Meta:
         model = DeploymentDownload
@@ -37,7 +37,20 @@ class DeploymentDownloadSerializer(serializers.ModelSerializer):
         except:
             return  f'https://api.dicebear.com/6.x/identicon/png?scale=50&seed=Snickers'
     
+    def get_deployment(self, obj):
+        return {'id': obj.deployment.id, 'name': obj.deployment.name, 'slug': obj.deployment.slug}
+        
+    
 class DeploymentDownloadPOSTSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeploymentDownload
         fields = '__all__'
+
+
+# class DeploymentDownloadStatsSummaryEndpoint(serializers.Serializer):
+
+#     downloads = DeploymentDownloadSerializer(many=True, source='deploymentdownload_set', read_only=True)
+
+#     class Meta:
+#         model = Deployment
+#         fields = ['downloads']
