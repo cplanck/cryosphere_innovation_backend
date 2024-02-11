@@ -32,7 +32,7 @@ class SendUserEmail(APIView):
 
 
 class UpdatesAndChangesEndpoint(viewsets.ModelViewSet):
-    queryset = UpdatesAndChanges.objects.all().order_by('-published_date')
+    queryset = UpdatesAndChanges.objects.order_by('-published_date')
     serializer_class = UpdatesAndChangesSerializer
     authentication_classes = [CookieTokenAuthentication]
 

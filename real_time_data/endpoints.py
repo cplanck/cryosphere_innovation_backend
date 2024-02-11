@@ -196,12 +196,13 @@ def get_gmail_from_message_id(message_id):
         if subject and len(subject['value']) >= 18 and subject['value'][:18] == 'SBD Msg From Unit:':
             # SBD message found
             binary_message_object, file_name = get_binary_message_attachment(message_id)
-
             imei = file_name[:15]
             if binary_message_object:
                 return binary_message_object, file_name, imei
             else:
                 return None, None, imei
+        else:
+            return None, None, None
     except:
         print('There was a problem fetching the gmail')
         return None, None, None
@@ -334,6 +335,8 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
                         except Exception as e:
                             print('THERE WAS A PROBLEM POSTING DATA TO MONGO DB')
                             print(e)
+
+                        # Need to add RTD object saving here with updated = datetime.now()
                     else:
                         print(f'NO BINARY OBJECT PRESENT, LIKELY AN INCOMPLETE TRANSFER')
                     
@@ -403,7 +406,7 @@ class GetSBDDetailsByDeployment(viewsets.ModelViewSet):
     
     def get_queryset(self):
         deployment = self.request.GET.get('deployment')
-        queryset = SBDData.objects.filter(deployment=deployment).order_by('last_modified')
+        queryset = SBDData.objects.filter(deployment=deployment).order_by('-sbd_filename')
         return queryset
 
 
@@ -427,7 +430,8 @@ class SBDDataDownloadEndpoint(viewsets.ViewSet):
             real_time_data_object.save()
             try:
                 subject = 'subject: SBD Msg From Unit: {}'.format(request.data['imei'])
-                query = f'{subject}"'
+                query = f'{subject}'
+                print(query)
                 response = gmail_service.users().messages().list(
                     userId='me', maxResults=500, q=query).execute()
 
@@ -437,7 +441,7 @@ class SBDDataDownloadEndpoint(viewsets.ViewSet):
 
                 while 'nextPageToken' in response:
                     page_token = response['nextPageToken']
-                    response = gmail_service.users().messages().list(userId='me', maxResults=500,
+                    response = gmail_service.users().messages().list(userId='me', maxResults=5000,
                                                             q=subject, pageToken=page_token).execute()
                     if 'messages' in response:
                         gmail_messages.extend(response['messages'])
@@ -463,9 +467,12 @@ class SBDDataDownloadEndpoint(viewsets.ViewSet):
                 print('Downloading SBD messages...')
                 for message in messages_to_download:
                     binary_message_object, file_name, imei = get_gmail_from_message_id(message['id'])
-                    create_sbd_data_entry_from_gmail_and_deployment(binary_message_object, file_name, real_time_data_object.deployment, message['id'])
-                    saved_entries = saved_entries + 1
-                
+                    if binary_message_object:
+                        create_sbd_data_entry_from_gmail_and_deployment(binary_message_object, file_name, real_time_data_object.deployment, message['id'])
+                        saved_entries = saved_entries + 1
+                    else:
+                        print('No binary attachment found')
+                   
                 real_time_data_object.downloading = False
                 real_time_data_object.save()
             else:
@@ -493,6 +500,8 @@ class SBDDecodeBinary(viewsets.ViewSet):
         sbd_files_list = list(SBDData.objects.filter(deployment=deployment).order_by('-sbd_filename').values_list('sbd_binary', 'sbd_filename'))
         existing_files_in_collection = get_data_from_mongodb(str(deployment.data_uuid), ['filename'])
         existing_files_in_collection = [file['filename'] for file in existing_files_in_collection]
+        print(existing_files_in_collection)
+        print(existing_files_in_collection)
         files_to_post = [file for file in sbd_files_list if file[1] not in existing_files_in_collection ]
 
         lambda_url = 'https://aid6pluilxmnmikbpkya6yhw4a0klpim.lambda-url.us-east-1.on.aws/'
