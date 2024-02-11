@@ -16,6 +16,13 @@ class UpdatesAndChanges(models.Model):
 
     def __str__(self):
         return self.title
+    
+class WebsiteStatus(models.Model):
+    status = models.CharField(max_length=100, blank=True, null=True)
+    severity = models.CharField(max_length=100, blank=True, null=True)
+
+    def __str__(self):
+        return self.status
 
 
 class CustomerQuote(models.Model):

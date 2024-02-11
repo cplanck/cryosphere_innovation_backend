@@ -66,3 +66,9 @@ class ContactUsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ContactUs
         fields = '__all__'
+
+class WebsiteStatusSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = WebsiteStatus
+        fields = '__all__'

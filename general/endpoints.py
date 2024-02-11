@@ -36,6 +36,14 @@ class UpdatesAndChangesEndpoint(viewsets.ModelViewSet):
     serializer_class = UpdatesAndChangesSerializer
     authentication_classes = [CookieTokenAuthentication]
 
+class WebsiteStatusEndpoint(viewsets.ModelViewSet):
+    queryset = WebsiteStatus.objects.all()
+    serializer_class = WebsiteStatusSerializer
+    authentication_classes = [CookieTokenAuthentication]
+
+    def get_queryset(self):
+        queryset = WebsiteStatus.objects.all()
+        return queryset
 
 class CustomerQuoteEndpoint(viewsets.ModelViewSet):
     """
