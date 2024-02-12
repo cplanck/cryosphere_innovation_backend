@@ -38,19 +38,10 @@ class DeploymentDownloadSerializer(serializers.ModelSerializer):
             return  f'https://api.dicebear.com/6.x/identicon/png?scale=50&seed=Snickers'
     
     def get_deployment(self, obj):
-        return {'id': obj.deployment.id, 'name': obj.deployment.name, 'slug': obj.deployment.slug}
+        return {'id': obj.deployment.id, 'name': obj.deployment.name, 'slug': obj.deployment.slug, 'status': obj.deployment.status}
         
     
 class DeploymentDownloadPOSTSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeploymentDownload
         fields = '__all__'
-
-
-# class DeploymentDownloadStatsSummaryEndpoint(serializers.Serializer):
-
-#     downloads = DeploymentDownloadSerializer(many=True, source='deploymentdownload_set', read_only=True)
-
-#     class Meta:
-#         model = Deployment
-#         fields = ['downloads']
