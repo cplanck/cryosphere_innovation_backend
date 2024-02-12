@@ -43,7 +43,8 @@ class DeploymentDownloadEndpoint(viewsets.ModelViewSet):
         if deployment:
             deployment_downloads = self.queryset.filter(deployment=deployment).order_by('user').distinct('user')
         else:
-            deployment_downloads = self.queryset
+            # Refetch to prevent caching
+            deployment_downloads = DeploymentDownload.objects.select_related('user', 'user__userprofile', 'deployment')
         return deployment_downloads
     
 class AdminStatsEndpoint(viewsets.ViewSet):
@@ -68,7 +69,7 @@ class AdminStatsEndpoint(viewsets.ViewSet):
         new_users = User.objects.filter(date_joined__gte=(ny_time - timedelta(days=7)))
         new_users_serialized = UserSerializer(new_users, many=True)
 
-        sbd_files_downloaded_today = SBDData.objects.filter(date_added__gte=(ny_time - timedelta(days=1))).count()
+        sbd_files_downloaded_today = SBDData.objects.filter(date_added__gte=(utc_now - timedelta(hours=24))).count()
 
         real_time_data_errors = RealTimeData.objects.exclude(Q(error__isnull=True) | Q(error='')).count()
 
