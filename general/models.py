@@ -44,7 +44,8 @@ class CustomerQuote(models.Model):
 class Banner(models.Model):
     banner_text = models.CharField(blank=True, null=True)
     banner_link = models.CharField(blank=True, null=True)
-    severity = models.CharField(blank=True, null=True)
+    status = models.CharField(blank=True, null=True)
+    active = models.BooleanField(blank=True, null=True)
     uuid = models.UUIDField(default=uuid.uuid4)
     date_added = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
