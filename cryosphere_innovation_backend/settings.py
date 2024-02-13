@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'storages',
     'algoliasearch_django',
     'django_gsuite_email',
+    'notifications'
 ]
 
 MIDDLEWARE = [

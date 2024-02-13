@@ -25,3 +25,11 @@ class UserProfile(models.Model):
         Deployment, blank=True)
     dashboard_deployment_order = models.JSONField(null=True, blank=True)
     # pinned_deployments = models.ManyToManyField(PinnedDeployment, blank=True)
+
+    def get_avatar(self):
+        if(self.avatar):
+            return self.avatar.url
+        elif(self.google_avatar):
+            return self.google_avatar
+        else:
+            return f'https://api.dicebear.com/6.x/identicon/png?scale=70&seed={self.robot}'

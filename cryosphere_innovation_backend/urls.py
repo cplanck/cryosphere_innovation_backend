@@ -4,10 +4,6 @@ from django.http import HttpResponse
 from django.urls import include, path
 
 
-# def index(request):
-#     return HttpResponse("hello")
-
-
 urlpatterns = [
     path('', include('instruments.urls')),
     path('admin/', admin.site.urls),
@@ -17,5 +13,6 @@ urlpatterns = [
     path('general/', include('general.urls')),
     path('stats/', include('stats.urls')),
     path('real-time-data/', include('real_time_data.urls')),
+    path('notifications/', include('notifications.urls')),
     path(r'rest-auth/', include('dj_rest_auth.urls')),
 ]
