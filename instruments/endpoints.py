@@ -94,7 +94,7 @@ class DeploymentEndpoint(viewsets.ModelViewSet):
     permission_classes = [CheckDeploymentReadWritePermissions]
     pagination_class = DeploymentPagination
     lookup_field = 'slug'
-    queryset = Deployment.objects.all().order_by('-last_modified')
+    queryset = Deployment.objects.all().order_by('-last_modified').prefetch_related('instrument', 'realtimedata', 'collaborators')
     filterset_fields = ['status', 'web_page_enabled']
     http_method_names = ['get', 'post', 'patch', 'delete']
 

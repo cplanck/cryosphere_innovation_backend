@@ -5,8 +5,12 @@ from .endpoints import *
 
 router = routers.DefaultRouter()
 
+router.register('email', TestAmazonEmail,
+                basename='user-emails')
+
 router.register('', NotificationEndpoint,
                 basename='notifications')
+
 
 urlpatterns = [
     path('', include(router.urls)),
