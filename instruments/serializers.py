@@ -30,6 +30,8 @@ class DeploymentInstrumentOwnerSerializer(serializers.ModelSerializer):
 
 class InstrumentSerializer(serializers.ModelSerializer):
 
+    deployment_num = serializers.SerializerMethodField()
+
     class Meta:
         model = Instrument
         fields = '__all__'
@@ -41,6 +43,10 @@ class InstrumentSerializer(serializers.ModelSerializer):
             fields['owner'] = UserSerializer()
             fields['sensor_package'] = SensorPackageInstrumentSerializer()
         return fields
+    
+    def get_deployment_num(self, obj):
+        print(Deployment.objects.filter(instrument=obj).count())
+        return Deployment.objects.filter(instrument=obj).count()
 
 
 class InstrumentPOSTSerializer(serializers.ModelSerializer):
