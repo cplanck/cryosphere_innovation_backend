@@ -35,6 +35,9 @@ class InstrumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Instrument
         fields = '__all__'
+        # fields = ['name', 'serial_number', 'sensor_package', 'unique_index', 'owner', 'avatar', 'deployment_num']
+        # read_only_fields = ['name', 'serial_number', 'sensor_package', 'unique_index', 'owner', 'avatar', 'owner', 'sensor_package']
+
 
     def get_fields(self):
         fields = super().get_fields()
@@ -44,8 +47,8 @@ class InstrumentSerializer(serializers.ModelSerializer):
             fields['sensor_package'] = SensorPackageInstrumentSerializer()
         return fields
     
+    
     def get_deployment_num(self, obj):
-        print(Deployment.objects.filter(instrument=obj).count())
         return Deployment.objects.filter(instrument=obj).count()
 
 
@@ -65,14 +68,16 @@ class DeploymentInstrumentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Instrument
-        fields = ['name', 'avatar', 'id',
-                  'serial_number', 'instrument_type', 'sensor_package', 'owner', 'is_simb3', 'unique_index']
+        fields = ['name', 'avatar', 'id', 'owner',
+                  'serial_number', 'instrument_type', 'sensor_package', 'is_simb3', 'unique_index']
+        read_only_fields=fields
+
 
 
 class DeploymentGETSerializer(serializers.ModelSerializer):
     """
     Returns a nested representation of instrument on GET requests
-    """
+    # """
     instrument = DeploymentInstrumentSerializer()
     collaborators = CollaboratorSerializer(many=True)
     real_time_data = serializers.SerializerMethodField(method_name='get_real_time_data')
@@ -85,6 +90,7 @@ class DeploymentGETSerializer(serializers.ModelSerializer):
     class Meta:
         model = Deployment
         fields = '__all__'
+        read_only_fields = ['instrument', 'collaborators', 'real_time_data', 'owner', 'deployment_number', 'name', 'status', 'location', 'path', 'data_uuid', 'deployment_description', 'deployment_start_date', 'deployment_end_date', 'collaborators']
 
 class PublicDeploymentGETSerializer(serializers.ModelSerializer):
 

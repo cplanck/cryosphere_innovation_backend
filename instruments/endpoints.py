@@ -41,7 +41,7 @@ class InstrumentEndpoint(viewsets.ModelViewSet):
     
     Updated 12 August 2023
     """
-    authentication_classes = [CookieTokenAuthentication, JWTAuthentication]
+    authentication_classes = [CookieTokenAuthentication]
     serializer_class = InstrumentSerializer
     pagination_class = InstrumentPagination
     queryset = Instrument.objects.order_by('-last_modified')
@@ -94,7 +94,7 @@ class DeploymentEndpoint(viewsets.ModelViewSet):
     permission_classes = [CheckDeploymentReadWritePermissions]
     pagination_class = DeploymentPagination
     lookup_field = 'slug'
-    queryset = Deployment.objects.all().order_by('-last_modified').prefetch_related('instrument', 'realtimedata', 'collaborators')
+    queryset = Deployment.objects.all().order_by('-last_modified').order_by('status').prefetch_related('instrument', 'realtimedata', 'collaborators')
     filterset_fields = ['status', 'web_page_enabled']
     http_method_names = ['get', 'post', 'patch', 'delete']
 
@@ -131,8 +131,13 @@ class DeploymentEndpoint(viewsets.ModelViewSet):
         self.check_object_permissions(request, instance)
         return super().destroy(request, slug=slug)
 
+    
     def get_queryset(self):
-        return deployment_permissions_filter(self, self.queryset)
+        queryset = deployment_permissions_filter(self, self.queryset)
+        query = self.request.GET.get('q')
+        if query:
+            queryset = queryset.filter(name__icontains=query)
+        return queryset
     
 
 
