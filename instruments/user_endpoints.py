@@ -12,9 +12,15 @@ class UserInstrumentEndpoint(InstrumentEndpoint):
     """
     def get_queryset(self):
         if self.request.user.is_staff:
-            return self.queryset
+            queryset = self.queryset
         else:
-            queryset = self.queryset.filter(owner=self.request.user).order_by('-last_modified')
+            queryset = self.queryset.filter(owner=self.request.user)
+
+        query = self.request.GET.get('q')
+        if query:
+            queryset = queryset.filter(name__icontains=query)
+            return queryset
+        else:
             return queryset
 
 
@@ -28,7 +34,13 @@ class UserDeploymentEndpoint(DeploymentEndpoint):
             return self.queryset
         else:
             queryset = Deployment.objects.filter(instrument__owner=self.request.user).order_by('-last_modified')
+            ## To add deployments for collaborators, use below:
+            # queryset = Deployment.objects.filter(
+            # Q(instrument__owner=self.request.user) |
+            # Q(collaborators=self.request.user)
+            # ).distinct().order_by('-last_modified')
             # queryset = self.queryset.filter(Q(instrument__owner=self.request.user) | Q(collaborators__in=[self.request.user])).order_by('-last_modified')
+
             return deployment_permissions_filter(self, queryset)
 
 class UserInstrumentSensorPackageEndpoint(InstrumentSensorPackageEndpoint):

@@ -69,9 +69,16 @@ class InstrumentEndpoint(viewsets.ModelViewSet):
         else:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
 
+    def get_queryset(self):
+        queryset = self.queryset
+        query = self.request.GET.get('q')
+        if query:
+            queryset = queryset.filter(name__icontains=query)
+        return queryset
+    
 
 class DeploymentPagination(pagination.PageNumberPagination):
-    page_size = 10
+    page_size = 100
     page_size_query_param = 'page_size'
     max_page_size = 1000
 
