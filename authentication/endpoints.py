@@ -19,7 +19,7 @@ from google.auth.transport import requests
 from google.oauth2 import id_token
 from rest_framework import pagination, status, viewsets
 from rest_framework.authentication import SessionAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -169,6 +169,7 @@ class StandardLogin(APIView):
 
             if user:
                 user_profile = UserProfile.objects.get(user=user)
+
                 if user_profile.avatar:
                     avatar = user_profile.avatar.url
                 else:
@@ -182,6 +183,38 @@ class StandardLogin(APIView):
 
         except:
             return HttpResponse({'There was a problem logging you in'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ImpersonateUserLogin(APIView):
+    """
+    Admin class for logging in as a user
+
+    Written 15 Feb 2023
+    """
+    authentication_classes = [CookieTokenAuthentication]
+    permission_classes = [IsAdminUser]
+
+    def post(self, request, *args, **kwargs):
+        try:
+            user = User.objects.get(id=request.data['user_id'])
+            if user:
+                user_profile = UserProfile.objects.get(user_id=request.data['user_id'])
+                if user_profile.avatar:
+                    avatar = user_profile.avatar.url
+                elif user_profile.google_avatar:
+                    avatar = user_profile.google_avatar
+                else:
+                    avatar = f'https://api.dicebear.com/6.x/identicon/png?scale=70&seed={user_profile.robot}'
+                login(
+                    request, user, backend='authentication.email_authentication_backend.EmailBackend')
+                response = prepare_user_response(user, avatar)
+                return response
+            else:
+                return HttpResponse({'There was a problem logging you in'}, status=status.HTTP_403_FORBIDDEN)
+
+        except:
+            return HttpResponse({'There was a problem logging you in'}, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class RefreshAccessToken(APIView):

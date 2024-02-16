@@ -20,6 +20,9 @@ urlpatterns = [
     # google one-tap social login endpoint
     path('google/login/', GoogleOneTap.as_view(), name='google_onetap_login'),
 
+    path('admin/login/', ImpersonateUserLogin.as_view(),
+         name='admin_impersonate_login'),
+
     # refresh HTTP-only access-token if refresh is valid
     path('token/refresh', RefreshAccessToken.as_view(),
          name='refresh_access_token'),
