@@ -288,11 +288,11 @@ class SBDDataDownloadEndpoint(viewsets.ViewSet):
 
     def create(self, request):
 
-        request = {
+        gmailPayload = {
         'labelIds': ['INBOX'],
         'topicName': 'projects/cryosphere-innovation/topics/sbd-data-download-lambda-trigger'
         }
-        gmail_service.users().watch(userId='iridiumdata@cryosphereinnovation.com', body=request).execute()
+        gmail_service.users().watch(userId='iridiumdata@cryosphereinnovation.com', body=gmailPayload).execute()
 
         imei = request.data['imei']
         real_time_data_object = RealTimeData.objects.filter(iridium_imei=imei).first()
