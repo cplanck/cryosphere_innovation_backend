@@ -18,7 +18,9 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from user_profiles.models import UserProfile
+from rest_framework import pagination, status, viewsets
 from user_profiles.serializers import *
+from instruments.helper_functions import *
 
 
 class UserSettingsEndpoint(viewsets.ModelViewSet):
@@ -80,6 +82,10 @@ class UserProfileEndpoint(viewsets.ModelViewSet):
     def get_queryset(self):
         return UserProfile.objects.filter(user=self.request.user)
 
+class UsersPagination(pagination.PageNumberPagination):
+    page_size = 100
+    page_size_query_param = 'page_size'
+    max_page_size = 100
 
 class UserEndpoint(viewsets.ModelViewSet):
 
@@ -88,8 +94,10 @@ class UserEndpoint(viewsets.ModelViewSet):
     """
     authentication_classes = [CookieTokenAuthentication]
     permission_classes = [IsAdminUser]
+    pagination_class = UsersPagination
     serializer_class = UserSerializer
-    # queryset = User.objects.all()
+    queryset = User.objects.all()
+    search_fields = ['first_name', 'last_name', 'email', 'userprofile__beta_tester']
 
     def create(self, request, *args, **kwargs):
         data = request.data.copy()
@@ -109,7 +117,8 @@ class UserEndpoint(viewsets.ModelViewSet):
             return Response('There was a problem creating this user', status=status.HTTP_400_BAD_REQUEST)
     
     def get_queryset(self):
-        return User.objects.all().order_by('first_name')
+        refined_queryset = search_and_filter_queryset(self.queryset, self.request, self.search_fields, 'last_login')
+        return refined_queryset
 
 
 class DashboardDeploymentMigration(viewsets.ModelViewSet):

@@ -288,6 +288,12 @@ class SBDDataDownloadEndpoint(viewsets.ViewSet):
 
     def create(self, request):
 
+        request = {
+        'labelIds': ['INBOX'],
+        'topicName': 'projects/cryosphere-innovation/topics/sbd-data-download-lambda-trigger'
+        }
+        gmail_service.users().watch(userId='iridiumdata@cryosphereinnovation.com', body=request).execute()
+
         imei = request.data['imei']
         real_time_data_object = RealTimeData.objects.filter(iridium_imei=imei).first()
 
@@ -365,26 +371,38 @@ class SBDDecodeBinary(viewsets.ViewSet):
         real_time_data_object.resyncing = True
         real_time_data_object.save()
 
-        deployment = real_time_data_object.deployment
-        sbd_files_list = list(SBDData.objects.filter(deployment=deployment).order_by('-sbd_filename').values_list('sbd_binary', 'sbd_filename'))
-        existing_files_in_collection = get_data_from_mongodb(str(deployment.data_uuid), ['filename'])
-        existing_files_in_collection = [file['filename'] for file in existing_files_in_collection]
-        files_to_post = [file for file in sbd_files_list if file[1] not in existing_files_in_collection ]
-
-        print(f'Resyncing {len(files_to_post)} files')
-        
         resynced_files = 0
-        for sbd_file in files_to_post:
-            try:
-                r = requests.post(lambda_url, json={ 'message_decode_test': True, 'rebase': False, 'decode_script_id': real_time_data_object.decode_script.id, 'message': base64.b64encode(sbd_file[0]).decode()})  
-                entry = r.json()['decoded_message']
-                entry['filename'] = sbd_file[1]
-                post_data_to_mongodb_collection(str(deployment.data_uuid), [entry])
-                resynced_files = resynced_files +1
-            except Exception as e:
-                print('ERROR: ', e)
-        
+        try:
+            deployment = real_time_data_object.deployment
+            sbd_files_list = list(SBDData.objects.filter(deployment=deployment).order_by('-sbd_filename').values_list('sbd_binary', 'sbd_filename'))
+            existing_files_in_collection = get_data_from_mongodb(str(deployment.data_uuid), ['filename'])
+            print(existing_files_in_collection)
+            existing_files_in_collection = [file['filename'] for file in existing_files_in_collection]
+            files_to_post = [file for file in sbd_files_list if file[1] not in existing_files_in_collection ]
+
+            print(f'Resyncing {len(files_to_post)} files')
+            
+            for sbd_file in files_to_post:
+                try:
+                    r = requests.post(lambda_url, json={ 'message_decode_test': True, 'rebase': False, 'decode_script_id': real_time_data_object.decode_script.id, 'message': base64.b64encode(sbd_file[0]).decode()})  
+                    entry = r.json()['decoded_message']
+                    entry['filename'] = sbd_file[1]
+                    post_data_to_mongodb_collection(str(deployment.data_uuid), [entry])
+                    resynced_files = resynced_files +1
+                except Exception as e:
+                    print('ERROR: ', e)
+                    real_time_data_object.resyncing=False
+                    real_time_data_object.error=str(e)
+                    real_time_data_object.updated=datetime.datetime.utcnow().isoformat()
+                    real_time_data_object.save()
+        except Exception as e:
+            real_time_data_object.resyncing=False
+            real_time_data_object.error=str(e)
+            real_time_data_object.updated=datetime.datetime.utcnow().isoformat()
+            real_time_data_object.save()
+            
         real_time_data_object.resyncing=False
+        real_time_data_object.error=None
         real_time_data_object.updated= datetime.datetime.utcnow().isoformat()
         real_time_data_object.save()
 

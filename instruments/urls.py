@@ -17,6 +17,10 @@ router.register('deployments', DeploymentEndpoint,
                 basename='internal_deployments')
 router.register('deployment/data', DeploymentDataEndpoint,
                 basename='deployment_data')
+router.register('deployment/data-validation', DeploymentDataValidationEndpoint,
+                basename='deployment_data_validation')
+router.register('deployment/data-metadata', DeploymentDataMetaDataEndpoint,
+                basename='deployment_data_metadata')
 router.register('sensors/predict', PredictSensorFields,
                 basename='predict_sensor_fields')
 router.register('sensors', InstrumentSensorPackageEndpoint,

@@ -4,6 +4,7 @@ from .deployment_permissions_filter import deployment_permissions_filter
 from .models import Deployment, Instrument
 from .endpoints import DeploymentEndpoint, InstrumentEndpoint, InstrumentSensorPackageEndpoint
 from django.db.models import Q
+from .helper_functions import *
 
 class UserInstrumentEndpoint(InstrumentEndpoint):
     """
@@ -16,12 +17,9 @@ class UserInstrumentEndpoint(InstrumentEndpoint):
         else:
             queryset = self.queryset.filter(owner=self.request.user)
 
-        query = self.request.GET.get('q')
-        if query:
-            queryset = queryset.filter(name__icontains=query)
-            return queryset
-        else:
-            return queryset
+        refined_queryset = search_and_filter_queryset(queryset, self.request, self.search_fields, 'last_modified')
+
+        return refined_queryset
 
 
 class UserDeploymentEndpoint(DeploymentEndpoint):
@@ -29,19 +27,17 @@ class UserDeploymentEndpoint(DeploymentEndpoint):
     Endpoint for CRUD on user deployments. Subclasses DeploymentEndpoint with an overridden queryset. 
     Update 12 August 2023
     """
-    def get_queryset(self):
-        if self.request.user.is_staff:
-            return self.queryset
-        else:
-            queryset = Deployment.objects.filter(instrument__owner=self.request.user).order_by('-last_modified')
-            ## To add deployments for collaborators, use below:
-            # queryset = Deployment.objects.filter(
-            # Q(instrument__owner=self.request.user) |
-            # Q(collaborators=self.request.user)
-            # ).distinct().order_by('-last_modified')
-            # queryset = self.queryset.filter(Q(instrument__owner=self.request.user) | Q(collaborators__in=[self.request.user])).order_by('-last_modified')
 
-            return deployment_permissions_filter(self, queryset)
+    def get_queryset(self):
+
+        if self.request.user.is_staff:
+            queryset = self.queryset
+        else:
+            queryset = self.queryset.filter(instrument__owner=self.request.user) 
+
+        refined_queryset = search_and_filter_queryset(queryset, self.request, self.search_fields, 'status')
+               
+        return refined_queryset
 
 class UserInstrumentSensorPackageEndpoint(InstrumentSensorPackageEndpoint):
     """

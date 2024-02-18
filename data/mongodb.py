@@ -60,8 +60,10 @@ def post_data_to_mongodb_collection(collection_name, data):
         rows_inserted = len(data)
         return {'rows_inserted': rows_inserted, 'rows_rejected': 0}
     except BulkWriteError as e:
+        print(e)
         total_rows = len(data)
         rows_rejected = len(e.details['writeErrors'])
+        # print(e.details['writeErrors'])
         rows_inserted = total_rows - rows_rejected
         return {'rows_inserted': rows_inserted, 'rows_rejected': rows_rejected}
 
@@ -103,3 +105,12 @@ def add_unique_index_to_mongodb_collection(collection_name, unique_index):
         return {'status': True, 'message': ''}
     except DuplicateKeyError as e:
         return {'status': False, 'message': e.details}
+    
+def get_collection_metadata(collection_name):
+    collection = db[collection_name]
+    collection_stats = db.command("collStats", collection.name)
+    indexes = collection.list_indexes()
+    index_list = []
+    for index in indexes:
+            index_list.append(index)
+    return collection_stats, index_list

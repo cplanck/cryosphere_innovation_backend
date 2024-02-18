@@ -25,6 +25,8 @@ from .serializers import (DeploymentGETSerializer, DeploymentSerializer,
                           InstrumentSerializer)
 from .permissions import CheckDeploymentReadWritePermissions
 from openai import OpenAI
+import re
+from .helper_functions import *
 
 
 
@@ -45,6 +47,8 @@ class InstrumentEndpoint(viewsets.ModelViewSet):
     serializer_class = InstrumentSerializer
     pagination_class = InstrumentPagination
     queryset = Instrument.objects.order_by('-last_modified')
+    search_fields = ['name','serial_number', 'instrument_type', 'owner__first_name', 'owner__last_name', 'owner__email', 'deployment__name']
+
 
     def partial_update(self, request, *args, **kwargs):
         try:
@@ -70,11 +74,8 @@ class InstrumentEndpoint(viewsets.ModelViewSet):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
 
     def get_queryset(self):
-        queryset = self.queryset
-        query = self.request.GET.get('q')
-        if query:
-            queryset = queryset.filter(name__icontains=query)
-        return queryset
+        refined_queryset = search_and_filter_queryset(self.queryset, self.request, self.search_fields, 'status')
+        return refined_queryset
     
 
 class DeploymentPagination(pagination.PageNumberPagination):
@@ -101,9 +102,10 @@ class DeploymentEndpoint(viewsets.ModelViewSet):
     permission_classes = [CheckDeploymentReadWritePermissions]
     pagination_class = DeploymentPagination
     lookup_field = 'slug'
-    queryset = Deployment.objects.all().order_by('-last_modified').order_by('status').prefetch_related('instrument', 'realtimedata', 'collaborators')
+    queryset = Deployment.objects.all().order_by('status').order_by('-last_modified').prefetch_related('instrument', 'realtimedata', 'collaborators')
     filterset_fields = ['status', 'web_page_enabled']
     http_method_names = ['get', 'post', 'patch', 'delete']
+    search_fields = ['name', 'location', 'status', 'data_uuid', 'slug' , 'instrument__name', 'instrument__serial_number', 'instrument__instrument_type', 'instrument__owner__first_name', 'instrument__owner__last_name', 'instrument__owner__email']
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -141,21 +143,9 @@ class DeploymentEndpoint(viewsets.ModelViewSet):
     
     def get_queryset(self):
         queryset = deployment_permissions_filter(self, self.queryset)
-        query = self.request.GET.get('q')
-        if query:
-            queryset = queryset.filter(name__icontains=query)
-        return queryset
+        refined_queryset = search_and_filter_queryset(queryset, self.request, self.search_fields, 'status')
+        return refined_queryset
     
-
-
-def strip_data_ends(data, strip_from_start, strip_from_end):
-    print(strip_from_start)
-    if strip_from_start:
-        data = data[strip_from_start:]
-    if strip_from_end:
-        data = data[:-strip_from_end]
-    return data
-
 
 class DeploymentDataEndpoint(viewsets.ViewSet):
 
@@ -187,8 +177,12 @@ class DeploymentDataEndpoint(viewsets.ViewSet):
         object = Deployment.objects.get(data_uuid=pk)
         self.check_object_permissions(request, object)
         try:
-            response = post_data_to_mongodb_collection(pk, request.data)
-            print(response)
+            cleaned_data = []
+            for row in request.data:
+                cleaned_headers, cleaned_row_num = clean_headers(row)
+                cleaned_row = replace_key_names(row, cleaned_headers)
+                cleaned_data.append(cleaned_row)
+            response = post_data_to_mongodb_collection(pk, cleaned_data)
             return Response(response, status=status.HTTP_201_CREATED)
         except Exception as e:
             print(e)
@@ -201,6 +195,45 @@ class DeploymentDataEndpoint(viewsets.ViewSet):
         return Response({'delete_count': delete_count}, status=status.HTTP_200_OK)
 
 
+class DeploymentDataValidationEndpoint(viewsets.ViewSet):
+    """
+    Endpoint for validating user added deployment data. 
+
+    Writted 17 February, 2024
+    """
+
+    authentication_classes = [CookieTokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request):
+        print(self.request.data)
+
+        if self.request.data['headers']:
+            cleaned_headers, counter = clean_headers(self.request.data['headers'])
+            return Response({'cleaned_headers': cleaned_headers, 'cleaned_counter': counter})
+
+        else:
+            return Response('No headers found in request')
+
+class DeploymentDataMetaDataEndpoint(viewsets.ViewSet):
+    """
+    Get Metadata stats for a deployment MongoDB collection
+
+    Writted 17 February, 2024
+    """
+
+    authentication_classes = [CookieTokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+
+    def retrieve(self, request, pk=None):
+        collection_metadata, indexes = get_collection_metadata(str(pk))
+        print(collection_metadata['size'])
+        return Response({'count': collection_metadata['count'],  
+                         'size': collection_metadata['size'], 
+                         'storage_size': collection_metadata['storageSize'], 
+                         'indexes': indexes
+                         })
 
 class InstrumentSensorPackageEndpoint(viewsets.ModelViewSet):
     """
@@ -210,6 +243,7 @@ class InstrumentSensorPackageEndpoint(viewsets.ModelViewSet):
     """
      
     authentication_classes = [CookieTokenAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = InstrumentSensorPackageSerializer
     filterset_fields = ['template', 'user']
     queryset = InstrumentSensorPackage.objects.all()
