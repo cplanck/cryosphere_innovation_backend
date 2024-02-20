@@ -366,22 +366,20 @@ class DeploymentMediaEndpoint(viewsets.ModelViewSet):
 
     authentication_classes = [CookieTokenAuthentication]
     permission_classes = [IsAuthenticatedOrReadOnly]
-    # lookup_field = 'deployment'
     queryset = DeploymentMedia.objects.all().order_by('-last_modified')
-    serializer_class = DeploymentMediaSerializer(many=True)
+    serializer_class = DeploymentMediaSerializer
 
     def create(self, request):
 
-        if request.data['type'] == 'image/png':
-            pass
-
         media = DeploymentMedia(
             deployment_id=request.data['deployment_id'],
-            location=request.FILES['file'], type=request.data['type'], size=request.data['size'])
+            location=request.FILES['file'], 
+            name=request.data['name'],
+            type=request.data['type'], 
+            size=request.data['size'])
         media.save()
         return Response('MEDIA ENDPOINT WIRED UP!')
     
     def retrieve(self, request, pk=None):
         serialized_data = DeploymentMediaSerializer(self.queryset.filter(deployment=pk), many=True)
-        print(serialized_data)
         return Response(serialized_data.data)

@@ -47,6 +47,7 @@ class DeploymentMedia(models.Model):
     location = models.FileField(null=True, blank=True,
                                 upload_to=custom_filename)
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
+    name = models.CharField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     private = models.BooleanField(blank=True, null=False, default=False)
     type = models.CharField(blank=True, null=True)
