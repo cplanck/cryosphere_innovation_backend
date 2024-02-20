@@ -112,3 +112,8 @@ class InstrumentSensorPackageSerializer(serializers.ModelSerializer):
     class Meta:
         model = InstrumentSensorPackage
         fields = '__all__'
+
+class DeploymentMediaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DeploymentMedia
+        fields = '__all__'

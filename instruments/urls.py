@@ -27,6 +27,8 @@ router.register('sensors', InstrumentSensorPackageEndpoint,
                 basename='instrument_sensor_package')
 router.register('add-unique-index', AddUniqueIDtoDeploymentMongoDB,
                 basename='add_unique_index')
+router.register('media', DeploymentMediaEndpoint,
+                basename='deployment_media')
 
 # User endpoints
 # For the frontend user defined instruments/deployments

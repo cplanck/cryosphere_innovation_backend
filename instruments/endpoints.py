@@ -18,12 +18,14 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from instruments.base_models import InstrumentSensorPackage
 
 from .deployment_permissions_filter import deployment_permissions_filter
-from .models import Deployment, Instrument
+from .models import Deployment, Instrument, DeploymentMedia
 from .serializers import (DeploymentGETSerializer, DeploymentSerializer,
                           InstrumentPOSTSerializer,
                           InstrumentSensorPackageSerializer,
-                          InstrumentSerializer)
+                          InstrumentSerializer, DeploymentMediaSerializer)
 from .permissions import CheckDeploymentReadWritePermissions
+from django.shortcuts import render
+from PIL import Image
 from openai import OpenAI
 import re
 from .helper_functions import *
@@ -282,8 +284,6 @@ class PredictSensorFields(viewsets.ViewSet):
             ],
         )
 
-        print(request.data)
-        print(completion.choices[0].message.content)
         return JsonResponse({'prediction': completion.choices[0].message.content}, status=status.HTTP_200_OK)
 
 
@@ -296,6 +296,7 @@ class AddUniqueIDtoDeploymentMongoDB(viewsets.ViewSet):
     Written 10 Feb 2024
     """
     authentication_classes = [CookieTokenAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def create(self, request):
         data_uuid = request.data['data_uuid']
@@ -318,3 +319,69 @@ class AddUniqueIDtoDeploymentMongoDB(viewsets.ViewSet):
                 return JsonResponse({'status': False, 'message': f'Error: {str(e)}'}, status=400)
         else:
             return JsonResponse({'status': f'no deployment found'}, status=400)
+
+
+def resize_image(image, long_edge_size):
+    # Calculate new dimensions while maintaining aspect ratio
+    width, height = image.size
+    aspect_ratio = width / height
+    if width > height:
+        new_width = long_edge_size
+        new_height = int(long_edge_size / aspect_ratio)
+    else:
+        new_width = int(long_edge_size * aspect_ratio)
+        new_height = long_edge_size
+    
+    # Resize the image
+    resized_image = image.resize((new_width, new_height))
+    return resized_image
+
+def upload_image(request):
+    if request.method == 'POST' and request.FILES['image']:
+        image = request.FILES['image']
+        
+        # Process the original image
+        original_image = Image.open(image)
+        
+        # Define the long edge size for each resized image
+        long_edge_sizes = [100, 300, 600]
+        
+        # Resize the image to three different sizes
+        for long_edge_size in long_edge_sizes:
+            resized_image = resize_image(original_image, long_edge_size)
+            
+            # Save the resized image
+            save_image(resized_image, f'{long_edge_size}_{image.name}')
+        
+    return render(request, 'upload_image.html')
+
+class DeploymentMediaEndpoint(viewsets.ModelViewSet):
+
+    """
+    CRUD on Deployment media, like images, datafiles, etc., that
+    the user uploades
+
+    Written 19 Feb, 2024
+    """
+
+    authentication_classes = [CookieTokenAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    # lookup_field = 'deployment'
+    queryset = DeploymentMedia.objects.all().order_by('-last_modified')
+    serializer_class = DeploymentMediaSerializer(many=True)
+
+    def create(self, request):
+
+        if request.data['type'] == 'image/png':
+            pass
+
+        media = DeploymentMedia(
+            deployment_id=request.data['deployment_id'],
+            location=request.FILES['file'], type=request.data['type'], size=request.data['size'])
+        media.save()
+        return Response('MEDIA ENDPOINT WIRED UP!')
+    
+    def retrieve(self, request, pk=None):
+        serialized_data = DeploymentMediaSerializer(self.queryset.filter(deployment=pk), many=True)
+        print(serialized_data)
+        return Response(serialized_data.data)

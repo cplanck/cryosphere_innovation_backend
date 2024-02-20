@@ -42,7 +42,7 @@ class NotificationEndpoint(viewsets.ModelViewSet):
             return super().create(request)
 
     def get_queryset(self):
-        queryset = Notification.objects.filter(for_user=self.request.user).filter(deleted=False).order_by('seen').order_by('-date_added')
+        queryset = Notification.objects.filter(for_user=self.request.user).filter(deleted=False).order_by('seen').order_by('-date_added')[:20]
         return queryset
     
 def send_email_to_user():

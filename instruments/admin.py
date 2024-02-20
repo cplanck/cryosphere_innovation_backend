@@ -12,7 +12,7 @@ class DeploymentAdmin(admin.ModelAdmin):
     list_display = ['name', 'instrument',
                     'deployment_number', 'status', 'private']
 
-
 admin.site.register(Instrument, InstrumentAdmin)
 admin.site.register(InstrumentSensorPackage)
 admin.site.register(Deployment, DeploymentAdmin)
+admin.site.register(DeploymentMedia)
