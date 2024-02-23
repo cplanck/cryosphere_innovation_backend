@@ -366,10 +366,14 @@ class DeploymentMediaEndpoint(viewsets.ModelViewSet):
 
     authentication_classes = [CookieTokenAuthentication]
     permission_classes = [IsAuthenticatedOrReadOnly]
-    queryset = DeploymentMedia.objects.all().order_by('-last_modified')
+    queryset = DeploymentMedia.objects.all().order_by('-date_added')
     serializer_class = DeploymentMediaSerializer
 
     def create(self, request):
+
+        print(request.data['size'])
+        if int(request.data['size']) > 20 * 1024 * 1024:
+            return Response({'error': 'file size too large'}, status=400)
 
         media = DeploymentMedia(
             deployment_id=request.data['deployment_id'],
@@ -378,7 +382,7 @@ class DeploymentMediaEndpoint(viewsets.ModelViewSet):
             type=request.data['type'], 
             size=request.data['size'])
         media.save()
-        return Response('MEDIA ENDPOINT WIRED UP!')
+        return Response('')
     
     def retrieve(self, request, pk=None):
         serialized_data = DeploymentMediaSerializer(self.queryset.filter(deployment=pk), many=True)

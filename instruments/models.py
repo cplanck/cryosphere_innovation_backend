@@ -2,9 +2,10 @@ from django.db import models
 from io import BytesIO
 from django.core.files.base import ContentFile
 import urllib
-from PIL import Image
+from PIL import Image as PilImage, UnidentifiedImageError
 import os
 from instruments.base_models import *
+from django.core.exceptions import ValidationError
 import boto3
 from django.conf import settings
 import base64
@@ -17,7 +18,7 @@ class Deployment(BaseDeployment):
     instrument = models.ForeignKey(
         Instrument, on_delete=models.CASCADE, blank=True, null=True)
     rows_from_start = models.IntegerField(default=0, blank=True, null=True)
-    rows_from_end = models.IntegerField(default=None, blank=True, null=True)
+    rows_from_end = models.IntegerField(default=0, blank=True, null=True)
     database_parameters = models.JSONField(default=dict, blank=True)
 
     def algolia_index(self):
@@ -59,6 +60,49 @@ class DeploymentMedia(models.Model):
         if self.location:
             self.location.delete(save=False)
         super(DeploymentMedia, self).delete(*args, **kwargs)
-
+        
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)        
+
+        if self.location and self.location.file.size > 20 * 1024 * 1024:  # 50 MB
+            raise ValidationError("File size exceeds the limit of 50MB")
+        
+        super().save(*args, **kwargs)  # Save the model first to ensure the file is stored
+
+        # Attempt to open and identify the image file
+        try:
+            with self.location.open() as img_read:
+                img = PilImage.open(img_read)
+                img.verify()  # Verify if it's an image
+                img.close()
+
+                # Reopen the image for processing
+                img = PilImage.open(img_read)
+
+                max_size = 1500
+                if img.height > img.width:
+                    height_percent = (max_size / float(img.height))
+                    width_size = int((float(img.width) * float(height_percent)))
+                    new_size = (width_size, max_size)
+                else:
+                    width_percent = (max_size / float(img.width))
+                    height_size = int((float(img.height) * float(width_percent)))
+                    new_size = (max_size, height_size)
+
+                if img.height > max_size or img.width > max_size:
+                    img = img.resize(new_size, PilImage.ANTIALIAS)
+                    img_temp = BytesIO()
+                    image_format = 'PNG' if img.format is None else img.format
+                    img.save(img_temp, format=image_format)
+                    img_temp.seek(0)
+
+                    self.location.save(
+                        self.location.name,
+                        content=ContentFile(img_temp.read()),
+                        save=False
+                    )
+                    img_temp.close()
+
+        except UnidentifiedImageError:
+            pass
+
+        super().save(*args, **kwargs)  # Save the model again to save the changes

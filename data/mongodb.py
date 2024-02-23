@@ -75,6 +75,7 @@ def get_data_from_mongodb(collection_name, fields=None):
     if fields:
         projection = {field_name: 1 for field_name in fields}
         projection['_id'] = 1
+        # Need to updated these to use the unique index
         documents = collection.find({}, projection).sort('time_stamp', 1)
     else:
         documents = collection.find(
@@ -83,7 +84,6 @@ def get_data_from_mongodb(collection_name, fields=None):
     for document in documents:
         document['_id'] = str(document['_id'])
         response.append(document)
-
     return response
 
 def delete_objects_from_mongo_db_collection_by_id(collection_name, object_id_array):
