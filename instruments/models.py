@@ -63,19 +63,17 @@ class DeploymentMedia(models.Model):
         
     def save(self, *args, **kwargs):
 
-        if self.location and self.location.file.size > 20 * 1024 * 1024:  # 50 MB
+        if self.location and self.location.file.size > 20 * 1024 * 1024: 
             raise ValidationError("File size exceeds the limit of 50MB")
         
-        super().save(*args, **kwargs)  # Save the model first to ensure the file is stored
+        super().save(*args, **kwargs)
 
-        # Attempt to open and identify the image file
         try:
             with self.location.open() as img_read:
                 img = PilImage.open(img_read)
-                img.verify()  # Verify if it's an image
+                img.verify()
                 img.close()
 
-                # Reopen the image for processing
                 img = PilImage.open(img_read)
 
                 max_size = 1500

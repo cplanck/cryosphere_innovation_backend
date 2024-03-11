@@ -247,7 +247,7 @@ class InstrumentSensorPackageEndpoint(viewsets.ModelViewSet):
     authentication_classes = [CookieTokenAuthentication]
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = InstrumentSensorPackageSerializer
-    filterset_fields = ['template', 'user']
+    filterset_fields = ['template', 'user', 'created_by_instrument_id']
     queryset = InstrumentSensorPackage.objects.all()
 
 class PredictSensorFields(viewsets.ViewSet):

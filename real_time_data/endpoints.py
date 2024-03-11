@@ -232,6 +232,12 @@ class SBDGmailPubSubEndpoint(viewsets.ViewSet):
 
         print('INSIDE NEW GMAIL PUB SUB ENDPOINT')
 
+        gmailPayload = {
+        'labelIds': ['INBOX'],
+        'topicName': 'projects/cryosphere-innovation/topics/sbd-data-download-lambda-trigger'
+        }
+        gmail_service.users().watch(userId='iridiumdata@cryosphereinnovation.com', body=gmailPayload).execute()
+
         if not request.content_type or request.content_type == '':
                 request.META['CONTENT_TYPE'] = 'application/json'
                 

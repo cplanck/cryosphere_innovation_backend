@@ -24,6 +24,7 @@ class InstrumentSensorPackage(models.Model):
     latitude_field = models.JSONField(default=dict, blank=True, null=True)
     longitude_field = models.JSONField(default=dict, blank=True, null=True)
     time_stamp_format = models.TextField(max_length=200, null=True, blank=True)
+    created_by_instrument_id = models.IntegerField(blank=True, null=True)
     date_added = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     last_modified = models.DateTimeField(auto_now=True, null=True, blank=True)
 
