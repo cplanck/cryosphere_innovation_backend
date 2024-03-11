@@ -18,6 +18,7 @@ class PublicDeploymentEndpoint(DeploymentEndpoint):
     """
     authentication_classes = [APIKeyAuthentication]
     http_method_names = ['get'] # currently all CRUD needs to happen on the frontend, even if owner
+    lookup_field='data_uuid'
 
     def get_serializer_class(self):
         

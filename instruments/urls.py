@@ -43,7 +43,7 @@ router.register('user/deployment/data', DeploymentDataEndpoint,
 
 # Public endpoints. 
 # These use API key authentication
-router.register('public/deployments', PublicDeploymentEndpoint, basename='public_deployment_endpoint')
+router.register('public/deployments', PublicDeploymentEndpoint, basename='public_deployment_metadata_endpoint')
 router.register('public/deployment/data', PublicDataEndpoint, basename='public_data_endpoint')
 
 def api_root_page(request):
