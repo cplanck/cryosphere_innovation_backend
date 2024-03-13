@@ -105,7 +105,7 @@ class DeploymentEndpoint(viewsets.ModelViewSet):
     pagination_class = DeploymentPagination
     lookup_field = 'slug'
     queryset = Deployment.objects.all().order_by('status').order_by('-last_modified').prefetch_related('instrument', 'realtimedata', 'collaborators')
-    filterset_fields = ['status', 'web_page_enabled']
+    filterset_fields = ['status', 'web_page_enabled', 'instrument']
     http_method_names = ['get', 'post', 'patch', 'delete']
     search_fields = ['name', 'location', 'status', 'data_uuid', 'slug' , 'instrument__name', 'instrument__serial_number', 'instrument__instrument_type', 'instrument__owner__first_name', 'instrument__owner__last_name', 'instrument__owner__email']
 
@@ -248,7 +248,7 @@ class InstrumentSensorPackageEndpoint(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = InstrumentSensorPackageSerializer
     filterset_fields = ['template', 'user', 'created_by_instrument_id']
-    queryset = InstrumentSensorPackage.objects.all()
+    queryset = InstrumentSensorPackage.objects.all().order_by('last_modified')
 
 class PredictSensorFields(viewsets.ViewSet):
     """

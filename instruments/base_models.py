@@ -59,10 +59,12 @@ class BaseInstrument(models.Model):
     avatar = models.ImageField(
         upload_to=generate_instrument_avatar_upload_path, null=True, blank=True)
     is_simb3 = models.BooleanField(null=True, blank=True, default=False)
+    build_date = models.DateTimeField(null=True, blank=True)
     description = models.TextField(max_length=2000, null=True, blank=True)
     notes = models.TextField(max_length=5000, null=True, blank=True)
     details = models.JSONField(blank=True, null=True)
     instrument_type = models.CharField(max_length=200, null=True, blank=True)
+    organization = models.CharField(max_length=200, null=True, blank=True)
     date_added = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     last_modified = models.DateTimeField(auto_now=True, null=True, blank=True)
 

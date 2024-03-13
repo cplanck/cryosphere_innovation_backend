@@ -17,7 +17,7 @@ class DeploymentInstrumentOwnerSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email', 'avatar']
+        fields = ['first_name', 'last_name', 'email', 'avatar', 'id']
     
     def get_avatar(self, obj):
         if obj.userprofile.avatar:
@@ -69,10 +69,8 @@ class DeploymentInstrumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Instrument
         fields = ['name', 'avatar', 'id', 'owner',
-                  'serial_number', 'instrument_type', 'sensor_package', 'is_simb3', 'unique_index']
+                  'serial_number', 'instrument_type', 'sensor_package', 'is_simb3', 'unique_index', 'notes', 'build_date', 'notes', 'description', 'organization']
         read_only_fields=fields
-
-
 
 class DeploymentGETSerializer(serializers.ModelSerializer):
     """
