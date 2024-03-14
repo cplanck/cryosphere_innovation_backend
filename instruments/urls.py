@@ -29,7 +29,8 @@ router.register('add-unique-index', AddUniqueIDtoDeploymentMongoDB,
                 basename='add_unique_index')
 router.register('media', DeploymentMediaEndpoint,
                 basename='deployment_media')
-
+router.register('deployment/initial-conditions', DeploymentInitialConditionEndpoint,
+                basename='deployment_initial_conditions')
 # User endpoints
 # For the frontend user defined instruments/deployments
 router.register('user/sensors', UserInstrumentSensorPackageEndpoint,

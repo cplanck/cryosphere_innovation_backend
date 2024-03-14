@@ -115,3 +115,8 @@ class DeploymentMediaSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeploymentMedia
         fields = '__all__'
+        
+class DeploymentInitialConditionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DeploymentInitialConditions
+        fields = '__all__'

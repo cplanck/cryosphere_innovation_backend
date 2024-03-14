@@ -18,11 +18,11 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from instruments.base_models import InstrumentSensorPackage
 
 from .deployment_permissions_filter import deployment_permissions_filter
-from .models import Deployment, Instrument, DeploymentMedia
+from .models import Deployment, Instrument, DeploymentMedia, DeploymentInitialConditions
 from .serializers import (DeploymentGETSerializer, DeploymentSerializer,
                           InstrumentPOSTSerializer,
                           InstrumentSensorPackageSerializer,
-                          InstrumentSerializer, DeploymentMediaSerializer)
+                          InstrumentSerializer, DeploymentMediaSerializer, DeploymentInitialConditionSerializer)
 from .permissions import CheckDeploymentReadWritePermissions
 from django.shortcuts import render
 from PIL import Image
@@ -263,18 +263,6 @@ class PredictSensorFields(viewsets.ViewSet):
 
     def create(self, request):
         client = OpenAI()
-
-    #     stream = client.chat.completions.create(
-    #     model="gpt-4",
-    #     messages=[
-    #         {"role": "system", "content": "You will be provided with a list of headers and your goal is to return a list of objects, where each object is the form {fieldName: value, databaseName: value, unit: value, decimal: value}.  If the header you receive is capitalized or has spaces, you should use it as the fieldName. You should then decapitalize it and replace any spaces with underscores. There should be no special characters in the databaseName, but the fieldName should look nice and be capitalized. You should also estimate a value for the unit. Examples are 'C' for temperatures, 'mBar' for pressures, and 'deg' for latitudes or longitudes. fieldName acronyms should be capitalized. Any number should use the # for the unit. Temperatures should default to deg C. Times should default to seconds or Unix. The output must always be a list of dictionaries/objects. Never truncate the output or print anything else."},
-    #         {"role": "user", "content": str(request.data)},
-    #         ],
-    #     stream=True,
-    # )
-    #     for chunk in stream:
-    #         if chunk.choices[0].delta.content is not None:
-    #             print(chunk.choices[0].delta.content, end="")
             
         completion = client.chat.completions.create(
             model="gpt-4",
@@ -387,3 +375,19 @@ class DeploymentMediaEndpoint(viewsets.ModelViewSet):
     def retrieve(self, request, pk=None):
         serialized_data = DeploymentMediaSerializer(self.queryset.filter(deployment=pk), many=True)
         return Response(serialized_data.data)
+    
+    
+
+class DeploymentInitialConditionEndpoint(viewsets.ModelViewSet):
+    
+    """
+    CRUD on deployment initial conditions.
+    
+    Written 13 March 2024
+    """
+    
+    authentication_classes = [CookieTokenAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    serializer_class = DeploymentInitialConditionSerializer
+    filterset_field = ['deployment']
+    queryset = DeploymentInitialConditions.objects.all()

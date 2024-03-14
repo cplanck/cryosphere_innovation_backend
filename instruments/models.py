@@ -103,4 +103,21 @@ class DeploymentMedia(models.Model):
         except UnidentifiedImageError:
             pass
 
-        super().save(*args, **kwargs)  # Save the model again to save the changes
+        super().save(*args, **kwargs) 
+
+
+class DeploymentInitialConditions(models.Model):
+    
+    """
+    Model for storing initial conditions of a deployment.
+    """
+
+    deployment = models.ForeignKey(Deployment, on_delete=models.CASCADE)
+    field = models.CharField(max_length=200,null=True, blank=True)
+    value = models.CharField(max_length=200, null=True, blank=True)
+    description = models.CharField(null=True, blank=True)
+    date_added = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    last_modified = models.DateTimeField(auto_now=True, null=True)
+
+    def __str__ (self):
+        return f"{self.field}"
