@@ -389,5 +389,5 @@ class DeploymentInitialConditionEndpoint(viewsets.ModelViewSet):
     authentication_classes = [CookieTokenAuthentication]
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = DeploymentInitialConditionSerializer
-    filterset_field = ['deployment']
+    filterset_fields = ['deployment']
     queryset = DeploymentInitialConditions.objects.all()
